@@ -38,7 +38,40 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
 <div class="container mt-5">
     <h1 class="text-center mb-4"><?php echo $curso['titulo']; ?></h1>
 
-    <div class="accordion" id="accordionExample">
+    <!-- Acordeón para las evaluaciones -->
+    <div class="accordion mb-4" id="accordionEvaluaciones">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingEvaluaciones">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEvaluaciones" aria-expanded="true" aria-controls="collapseEvaluaciones">
+                    Evaluaciones del Curso
+                </button>
+            </h2>
+            <div id="collapseEvaluaciones" class="accordion-collapse collapse show" aria-labelledby="headingEvaluaciones" data-bs-parent="#accordionEvaluaciones">
+                <div class="accordion-body">
+                    <?php
+                    // Obtener todas las evaluaciones asociadas al curso
+                    $evaluaciones = $conexion->query("SELECT * FROM evaluaciones WHERE curso_id = $curso_id");
+
+                    if ($evaluaciones->num_rows > 0) {
+                        while ($eval = $evaluaciones->fetch_assoc()) {
+                            echo '<div class="mb-4">';
+                            echo '<h5>' . $eval['titulo'] . '</h5>';
+                            echo '<p>' . $eval['descripcion'] . '</p>';
+                            echo '<a href="ver_evaluacion.php?evaluacion_id=' . $eval['id'] . '" class="btn btn-primary">Ver Evaluación</a>';
+                            echo '</div>';
+                            echo '<hr>'; // Separador entre evaluaciones
+                        }
+                    } else {
+                        echo '<p>No hay evaluaciones disponibles para este curso.</p>';
+                    }
+                    ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acordeón para los períodos -->
+    <div class="accordion" id="accordionPeriodos">
         <?php
         $periodos = ['primer_periodo', 'segundo_periodo', 'tercer_periodo', 'cuarto_periodo'];
         foreach ($periodos as $index => $periodo) {
@@ -48,7 +81,7 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
             echo ucfirst(str_replace('_', ' ', $periodo));
             echo '</button>';
             echo '</h2>';
-            echo '<div id="collapse' . $index . '" class="accordion-collapse collapse" aria-labelledby="heading' . $index . '" data-bs-parent="#accordionExample">';
+            echo '<div id="collapse' . $index . '" class="accordion-collapse collapse" aria-labelledby="heading' . $index . '" data-bs-parent="#accordionPeriodos">';
             echo '<div class="accordion-body">';
 
             // Obtener las tareas del curso para el periodo actual
@@ -56,19 +89,6 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
 
             if ($tareas->num_rows > 0) {
                 while ($tarea = $tareas->fetch_assoc()) {
-
-// Obtener la evaluación asociada al curso
-    $evaluacion = $conexion->query("SELECT * FROM evaluaciones WHERE curso_id = $curso_id");
-
-    if ($evaluacion->num_rows > 0) {
-    $eval = $evaluacion->fetch_assoc();
-    echo '<a href="ver_evaluacion.php?evaluacion_id=' . $eval['id'] . '" class="btn btn-primary">Ver Evaluación</a>';
-} else {
-    echo '<p>No hay evaluación disponible para este curso.</p>';
-}
-
-
-
                     echo '<div class="mb-3">';
                     echo '<p><strong>' . basename($tarea['archivo']) . '</strong> (' . ucfirst($tarea['tipo']) . ')</p>';
                     echo '<a href="' . $tarea['archivo'] . '" class="btn btn-primary" download>Descargar</a>';

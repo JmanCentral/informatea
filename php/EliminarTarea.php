@@ -1,5 +1,5 @@
 <?php
-include __DIR__ . '/../../conexion_be.php'; // Conexión a la base de datos
+include __DIR__ . '/conexion_be.php'; // Conexión a la base de datos
 
 $tarea_id = $_GET['id'] ?? '';
 $archivo = $_GET['archivo'] ?? '';

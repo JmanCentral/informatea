@@ -1,8 +1,20 @@
 <?php
-include 'conexion_be.php'; 
+include 'conexion_be.php'; // Asegúrate de que la ruta sea correcta
 
-$query = "SELECT * FROM comentarios ORDER BY fecha DESC";
+// Obtener el ID del curso desde la URL
+$curso_id = $_GET['curso_id'] ?? null;
+
+if (!$curso_id) {
+    die("Error: No se proporcionó el ID del curso.");
+}
+
+// Consulta para obtener los comentarios del curso específico
+$query = "SELECT * FROM comentarios WHERE curso_id = $curso_id ORDER BY fecha DESC";
 $result = $conexion->query($query);
+
+if (!$result) {
+    die("Error en la consulta: " . $conexion->error);
+}
 ?>
 
 <!DOCTYPE html>
@@ -14,14 +26,13 @@ $result = $conexion->query($query);
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="text-center mb-4">Comentarios Recientes</h1>
+        <h1 class="text-center mb-4">Comentarios del Curso</h1>
 
         <?php if ($result && $result->num_rows > 0): ?>
             <table class="table table-bordered">
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Curso ID</th>
                         <th>Estudiante</th>
                         <th>Comentario</th>
                         <th>Fecha</th>
@@ -31,7 +42,6 @@ $result = $conexion->query($query);
                     <?php while ($comentario = $result->fetch_assoc()): ?>
                         <tr>
                             <td><?php echo $comentario['id']; ?></td>
-                            <td><?php echo $comentario['curso_id']; ?></td>
                             <td><?php echo $comentario['estudiante_correo']; ?></td>
                             <td><?php echo nl2br(htmlspecialchars($comentario['comentario'])); ?></td>
                             <td><?php echo $comentario['fecha']; ?></td>
@@ -40,7 +50,7 @@ $result = $conexion->query($query);
                 </tbody>
             </table>
         <?php else: ?>
-            <div class="alert alert-warning">No hay comentarios disponibles.</div>
+            <div class="alert alert-warning">No hay comentarios disponibles para este curso.</div>
         <?php endif; ?>
     </div>
 </body>

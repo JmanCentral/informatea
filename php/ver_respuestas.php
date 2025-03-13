@@ -1,5 +1,5 @@
 <?php
-include __DIR__ . '/../../../php/conexion_be.php';
+include __DIR__ . '/conexion_be.php';
 
 // Verifica si 'curso_id' está presente en la URL y es un número válido
 if (!isset($_GET['curso_id']) || !is_numeric($_GET['curso_id'])) {
@@ -44,26 +44,31 @@ $result = $query->get_result();
 <body>
 <div class="container mt-5">
     <h2 class="mb-4">Respuestas de los Estudiantes</h2>
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Estudiante</th>
-                <th>Pregunta</th>
-                <th>Respuesta</th>
-                <th>Fecha</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php while ($row = $result->fetch_assoc()) { ?>
+
+    <?php if ($result->num_rows > 0): ?>
+        <table class="table table-bordered">
+            <thead>
                 <tr>
-                    <td><?php echo htmlspecialchars($row['estudiante_correo']); ?></td>
-                    <td><?php echo htmlspecialchars($row['pregunta']); ?></td>
-                    <td><?php echo strtoupper(htmlspecialchars($row['respuesta'])); ?></td>
-                    <td><?php echo htmlspecialchars($row['fecha_respuesta']); ?></td>
+                    <th>Estudiante</th>
+                    <th>Pregunta</th>
+                    <th>Respuesta</th>
+                    <th>Fecha</th>
                 </tr>
-            <?php } ?>
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                <?php while ($row = $result->fetch_assoc()): ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($row['estudiante_correo']); ?></td>
+                        <td><?php echo htmlspecialchars($row['pregunta']); ?></td>
+                        <td><?php echo strtoupper(htmlspecialchars($row['respuesta'])); ?></td>
+                        <td><?php echo htmlspecialchars($row['fecha_respuesta']); ?></td>
+                    </tr>
+                <?php endwhile; ?>
+            </tbody>
+        </table>
+    <?php else: ?>
+        <div class="alert alert-warning">No hay respuestas disponibles para este curso.</div>
+    <?php endif; ?>
 </div>
 </body>
 </html>

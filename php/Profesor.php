@@ -2,151 +2,6 @@
 <?php
 include 'conexion_be.php'; // Conexión a la base de datos
 
-
-
-// **Función para generar el archivo EliminarTarea.php**
-function crearEliminarTarea($carpeta) {
-    $contenido = <<<PHP
-    <?php
-    include __DIR__ . '/../../conexion_be.php';
-    \$tarea_id = \$_GET['id'] ?? '';
-    \$archivo = \$_GET['archivo'] ?? '';
-
-    if (empty(\$tarea_id)) {
-        die('<p class="alert alert-danger">ID de tarea no proporcionado.</p>');
-    }
-
-    if (file_exists(\$archivo)) {
-        unlink(\$archivo);
-    }
-
-    \$query = "DELETE FROM tareas WHERE id = \$tarea_id";
-    if (\$conexion->query(\$query) === TRUE) {
-        echo '<p class="alert alert-success">Tarea eliminada correctamente.</p>';
-    } else {
-        echo '<p class="alert alert-danger">Error al eliminar la tarea.</p>';
-    }
-
-    header('Location: ' . \$_SERVER['HTTP_REFERER']);
-    exit;
-    ?>
-    PHP;
-
-    file_put_contents("$carpeta/EliminarTarea.php", $contenido);
-}
-
-// **Función para generar el archivo TareasSubidas.php**
-function crearTareasSubidas($carpeta) {
-    $contenido = <<<PHP
-    <?php
-    include __DIR__ . '/../../conexion_be.php';
-    \$tarea_padre_id = \$_GET['tarea_id'] ?? '';
-
-    if (empty(\$tarea_padre_id)) {
-        echo '<p class="alert alert-danger">No se ha especificado la tarea padre correctamente.</p>';
-        exit;
-    }
-
-    \$query = "SELECT * FROM tareas WHERE tarea_padre_id = \$tarea_padre_id";
-    \$result = \$conexion->query(\$query);
-    ?>
-
-    <!DOCTYPE html>
-    <html lang="es">
-    <head>
-        <meta charset="UTF-8">
-        <title>Tareas Subidas</title>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    </head>
-    <body>
-    <div class="container mt-5">
-        <h1 class="text-center mb-4">Tareas Subidas para la Tarea Padre ID: <?php echo \$tarea_padre_id; ?></h1>
-
-        <?php if (\$result && \$result->num_rows > 0): ?>
-            <table class="table table-bordered">
-                <thead>
-                <tr>
-                    <th>Tarea ID</th>
-                    <th>Estudiante</th>
-                    <th>Archivo</th>
-                    <th>Acciones</th>
-                </tr>
-                </thead>
-                <tbody>
-                <?php while (\$tarea = \$result->fetch_assoc()): ?>
-                    <tr>
-                        <td><?php echo \$tarea['id']; ?></td>
-                        <td><?php echo \$tarea['estudiante']; ?></td>
-                        <td><?php echo basename(\$tarea['archivo']); ?></td>
-                        <td>
-                            <a href="<?php echo '../' . \$tarea['archivo']; ?>" class="btn btn-primary btn-sm" download>Descargar</a>
-                            <a href="Calificar.php?id=<?php echo \$tarea['id']; ?>&estudiante=<?php echo urlencode(\$tarea['estudiante']); ?>" class="btn btn-warning btn-sm">Calificar</a>
-                            <a href="EliminarTarea.php?id=<?php echo \$tarea['id']; ?>&archivo=<?php echo urlencode(\$tarea['archivo']); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar esta tarea?');">Eliminar</a>
-                        </td>
-                    </tr>
-                <?php endwhile; ?>
-                </tbody>
-            </table>
-        <?php else: ?>
-            <div class="alert alert-warning">No se han subido tareas para esta tarea padre.</div>
-        <?php endif; ?>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    </body>
-    </html>
-    PHP;
-
-    file_put_contents("$carpeta/TareasSubidas.php", $contenido);
-}
-
-// **Función para generar el archivo Calificar.php**
-function crearCalificar($carpeta) {
-    $contenido = <<<PHP
-    <?php
-    include __DIR__ . '/../../conexion_be.php';
-    \$tarea_id = \$_GET['id'] ?? '';
-    \$estudiante = \$_GET['estudiante'] ?? '';
-
-    if (empty(\$tarea_id)) {
-        die('<p class="alert alert-danger">No se ha proporcionado un ID de tarea válido.</p>');
-    }
-
-    if (\$_SERVER['REQUEST_METHOD'] === 'POST') {
-        \$calificacion = \$_POST['calificacion'];
-        \$query = "UPDATE tareas SET calificacion = '\$calificacion' WHERE id = \$tarea_id";
-        if (\$conexion->query(\$query) === TRUE) {
-            echo '<p class="alert alert-success">Calificación guardada correctamente.</p>';
-        } else {
-            echo '<p class="alert alert-danger">Error al guardar la calificación.</p>';
-        }
-    }
-    ?>
-
-    <!DOCTYPE html>
-    <html lang="es">
-    <head>
-        <meta charset="UTF-8">
-        <title>Calificar Tarea</title>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    </head>
-    <body>
-    <div class="container mt-5">
-        <h1>Calificar Tarea de: <?php echo htmlspecialchars(\$estudiante); ?></h1>
-        <form method="POST" class="mt-3">
-            <div class="mb-3">
-                <label for="calificacion" class="form-label">Calificación (0-100)</label>
-                <input type="number" name="calificacion" id="calificacion" min="0" max="100" class="form-control" required>
-            </div>
-            <button type="submit" class="btn btn-success">Guardar Calificación</button>
-        </form>
-    </div>
-    </body>
-    </html>
-    PHP;
-
-    file_put_contents("$carpeta/Calificar.php", $contenido);
-}
 // Procesar la creación del curso con imagen
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['agregar_curso'])) {
     $titulo = $_POST['titulo'];
@@ -222,27 +77,38 @@ if (isset($_GET['eliminar'])) {
 
 // Función para crear la estructura del curso
 function crearEstructuraCurso($titulo, $id_curso) {
+    // Crear la carpeta del curso si no existe
     $nombre_carpeta = 'Cursos/' . str_replace(' ', '_', $titulo);
+    if (!is_dir($nombre_carpeta)) {
+        mkdir($nombre_carpeta, 0777, true);
+    }
+
+    // Nombre del archivo PHP del curso
     $nombre_archivo = $nombre_carpeta . "/Curso_" . str_replace(' ', '_', $titulo) . ".php";
 
+    // Contenido dinámico del archivo PHP
     $contenido = "
     <?php
     include __DIR__ . '/../../../php/conexion_be.php';
     \$curso_id = $id_curso;
-    \$titulo = '$titulo'; // Definir la variable título para evitar errores
+    \$titulo = '$titulo';
 
+    // Función para listar archivos y agregar la opción de eliminar
     function listarArchivos(\$periodo) {
         global \$conexion, \$curso_id;
         \$result = \$conexion->query(\"SELECT * FROM tareas WHERE curso_id=\$curso_id AND periodo='\$periodo'\");
         echo '<div class=\"list-group\">';
         while (\$archivo = \$result->fetch_assoc()) {
             \$archivo_path = \$archivo['archivo'];
-            echo '<div class=\"list-group-item\">';
+            echo '<div class=\"list-group-item d-flex justify-content-between align-items-center\">';
+            echo '<div>';
             echo '<p><strong>' . basename(\$archivo_path) . '</strong> - ' . ucfirst(\$archivo['tipo']) . '</p>';
-            echo '<a href=\"' . \$archivo_path . '\" class=\"btn btn-primary btn-sm\" download>Descargar</a>';
-            if (\$archivo['tipo'] == 'tarea') {
-                echo ' | <a href=\"../../../php/calificar.php?tarea_id=' . \$archivo['id'] . '\" class=\"btn btn-warning btn-sm\">Calificar</a>';
-            }
+            echo '</div>';
+            echo '<div>';
+            echo '<a href=\"' . \$archivo_path . '\" class=\"btn btn-primary btn-sm me-2\" download>Descargar</a>';
+            echo '<a href=\"../../../php/TareasSubidas.php?periodo=' . \$archivo['periodo'] . '&tarea_id=' . \$archivo['id'] . '\" class=\"btn btn-warning btn-sm me-2\">Ver Tareas Subidas</a>';
+            echo '<a href=\"../../../php/EliminarTarea.php?id=' . \$archivo['id'] . '&archivo=' . urlencode(\$archivo['archivo']) . '\" class=\"btn btn-danger btn-sm\" onclick=\"return confirm(\'¿Estás seguro de eliminar esta tarea?\');\">Eliminar</a>';
+            echo '</div>';
             echo '</div>';
         }
         echo '</div>';
@@ -251,7 +117,7 @@ function crearEstructuraCurso($titulo, $id_curso) {
     if (\$_SERVER['REQUEST_METHOD'] === 'POST' && isset(\$_POST['subir_archivo'])) {
         \$periodo = \$_POST['periodo'];
         \$tipo = \$_POST['tipo'];
-        \$texto = \$_POST['texto'] ?? ''; // Capturar el texto si se envía
+        \$texto = \$_POST['texto'] ?? '';
         \$archivo = \$_FILES['archivo']['name'] ?? '';
         \$ruta = __DIR__ . '/' . \$archivo;
 
@@ -274,12 +140,54 @@ function crearEstructuraCurso($titulo, $id_curso) {
         <meta charset=\"UTF-8\">
         <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
         <title>Curso <?php echo \$titulo; ?></title>
-        <link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css\">
+        <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css\" rel=\"stylesheet\">
+        <style>
+            body {
+                background-color: #f8f9fa;
+            }
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+            .btn-custom {
+                margin: 5px;
+            }
+            .accordion-button {
+                background-color: #007bff;
+                color: white;
+                font-weight: bold;
+            }
+            .accordion-button:not(.collapsed) {
+                background-color: #0056b3;
+                color: white;
+            }
+            .accordion-body {
+                background-color: #ffffff;
+                border: 1px solid #dee2e6;
+                border-top: none;
+            }
+            .list-group-item {
+                border: 1px solid #dee2e6;
+                margin-bottom: 10px;
+                border-radius: 5px;
+            }
+            .list-group-item:hover {
+                background-color: #f1f1f1;
+            }
+        </style>
     </head>
     <body>
     <div class=\"container mt-5\">
         <h1 class=\"text-center mb-4\">Curso: <?php echo \$titulo; ?></h1>
 
+        <!-- Botones de acción -->
+        <div class=\"text-center mb-4\">
+            <a href=\"../../../php/crear_evaluacion.php?curso_id=<?php echo \$curso_id; ?>\" class=\"btn btn-success btn-custom\">Crear Evaluación</a>
+            <a href=\"../../../php/ver_respuestas.php?curso_id=<?php echo \$curso_id; ?>\" class=\"btn btn-success btn-custom\">Consultar Evaluación</a>
+            <a href=\"../../../php/ver_comentarios.php?curso_id=<?php echo \$curso_id; ?>\" class=\"btn btn-info btn-custom\">Ver Comentarios</a>
+        </div>
+
+        <!-- Formulario para subir archivos o enviar texto -->
         <form method=\"POST\" enctype=\"multipart/form-data\" class=\"mb-4\">
             <div class=\"row g-3\">
                 <div class=\"col-md-6\">
@@ -299,67 +207,62 @@ function crearEstructuraCurso($titulo, $id_curso) {
                     </select>
                 </div>
             </div>
-
             <div class=\"mb-3 mt-3\">
                 <label for=\"texto\" class=\"form-label\">Escribir Texto (opcional)</label>
                 <textarea name=\"texto\" id=\"texto\" rows=\"3\" class=\"form-control\"></textarea>
             </div>
-
             <div class=\"mb-3\">
                 <label for=\"archivo\" class=\"form-label\">Subir Archivo (opcional)</label>
                 <input type=\"file\" name=\"archivo\" id=\"archivo\" class=\"form-control\">
             </div>
-
             <button type=\"submit\" name=\"subir_archivo\" class=\"btn btn-primary w-100\">Subir Archivo o Enviar Texto</button>
         </form>
 
+        <!-- Acordeón para los períodos -->
         <div class=\"accordion\" id=\"accordionExample\">
             <div class=\"accordion-item\">
-                <h2 class=\"accordion-header\" id=\"headingOne\">
-                    <button class=\"accordion-button\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#collapseOne\" aria-expanded=\"true\" aria-controls=\"collapseOne\">
+                <h2 class=\"accordion-header\">
+                    <button class=\"accordion-button\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#collapseOne\">
                         Primer Periodo
                     </button>
                 </h2>
-                <div id=\"collapseOne\" class=\"accordion-collapse collapse show\" aria-labelledby=\"headingOne\" data-bs-parent=\"#accordionExample\">
+                <div id=\"collapseOne\" class=\"accordion-collapse collapse show\">
                     <div class=\"accordion-body\">
                         <?php listarArchivos('primer_periodo'); ?>
                     </div>
                 </div>
             </div>
-            <!-- Otros periodos -->
             <div class=\"accordion-item\">
-                <h2 class=\"accordion-header\" id=\"headingOne\">
-                    <button class=\"accordion-button\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#collapseOne\" aria-expanded=\"true\" aria-controls=\"collapseOne\">
+                <h2 class=\"accordion-header\">
+                    <button class=\"accordion-button\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#collapseTwo\">
                         Segundo Periodo
                     </button>
                 </h2>
-                <div id=\"collapseOne\" class=\"accordion-collapse collapse show\" aria-labelledby=\"headingOne\" data-bs-parent=\"#accordionExample\">
+                <div id=\"collapseTwo\" class=\"accordion-collapse collapse show\">
                     <div class=\"accordion-body\">
                         <?php listarArchivos('segundo_periodo'); ?>
                     </div>
                 </div>
             </div>
-            <!-- Otros periodos -->
             <div class=\"accordion-item\">
-                <h2 class=\"accordion-header\" id=\"headingOne\">
-                    <button class=\"accordion-button\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#collapseOne\" aria-expanded=\"true\" aria-controls=\"collapseOne\">
+                <h2 class=\"accordion-header\">
+                    <button class=\"accordion-button\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#collapseThree\">
                         Tercer Periodo
                     </button>
                 </h2>
-                <div id=\"collapseOne\" class=\"accordion-collapse collapse show\" aria-labelledby=\"headingOne\" data-bs-parent=\"#accordionExample\">
+                <div id=\"collapseThree\" class=\"accordion-collapse collapse show\">
                     <div class=\"accordion-body\">
                         <?php listarArchivos('tercer_periodo'); ?>
                     </div>
                 </div>
             </div>
-            <!-- Otros periodos -->
             <div class=\"accordion-item\">
-                <h2 class=\"accordion-header\" id=\"headingOne\">
-                    <button class=\"accordion-button\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#collapseOne\" aria-expanded=\"true\" aria-controls=\"collapseOne\">
+                <h2 class=\"accordion-header\">
+                    <button class=\"accordion-button\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#collapseFour\">
                         Cuarto Periodo
                     </button>
                 </h2>
-                <div id=\"collapseOne\" class=\"accordion-collapse collapse show\" aria-labelledby=\"headingOne\" data-bs-parent=\"#accordionExample\">
+                <div id=\"collapseFour\" class=\"accordion-collapse collapse show\">
                     <div class=\"accordion-body\">
                         <?php listarArchivos('cuarto_periodo'); ?>
                     </div>
@@ -373,7 +276,9 @@ function crearEstructuraCurso($titulo, $id_curso) {
     </html>
     ";
 
+    // Guardar el contenido en el archivo
     file_put_contents($nombre_archivo, $contenido);
+
     return $nombre_archivo;
 }
 ?>
@@ -383,60 +288,188 @@ function crearEstructuraCurso($titulo, $id_curso) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Cursos</title>
+    <title>Dashboard de Cursos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background-color: #343a40;
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow-y: auto;
+            padding-top: 20px;
+        }
+        .sidebar a {
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            display: block;
+        }
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+        .content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        .navbar {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            position: fixed;
+            top: 0;
+            left: 250px;
+            right: 0;
+            z-index: 1000;
+        }
+        .navbar button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+        }
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .img-curso {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+        .curso-destacado {
+            text-align: center;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .curso-destacado img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+    </style>
 </head>
 <body>
-<div class="container mt-5">
-    <h1 class="text-center mb-4">Gestión de Cursos</h1>
-
-    <form method="POST" enctype="multipart/form-data" class="mb-4">
-        <div class="mb-3">
-            <label for="titulo" class="form-label">Título del Curso</label>
-            <input type="text" name="titulo" id="titulo" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label for="descripcion" class="form-label">Descripción</label>
-            <textarea name="descripcion" id="descripcion" rows="3" class="form-control" required></textarea>
-        </div>
-        <div class="mb-3">
-            <label for="imagen" class="form-label">Imagen del Curso</label>
-            <input type="file" name="imagen" id="imagen" class="form-control" required>
-        </div>
-        <button type="submit" name="agregar_curso" class="btn btn-primary w-100">Agregar Curso</button>
-    </form>
-
-    <div class="accordion" id="accordionCursos">
-        <?php
-        $result = $conexion->query("SELECT * FROM cursos");
-        if ($result->num_rows > 0) {
-            while ($curso = $result->fetch_assoc()) {
-                $archivo_curso = 'Cursos/' . str_replace(' ', '_', $curso['titulo']) . '/Curso_' . str_replace(' ', '_', $curso['titulo']) . '.php';
-                echo '<div class="accordion-item">';
-                echo '<h2 class="accordion-header" id="heading' . $curso['id'] . '">';
-                echo '<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse' . $curso['id'] . '" aria-expanded="false" aria-controls="collapse' . $curso['id'] . '">';
-                echo $curso['titulo'];
-                echo '</button>';
-                echo '</h2>';
-                echo '<div id="collapse' . $curso['id'] . '" class="accordion-collapse collapse" aria-labelledby="heading' . $curso['id'] . '" data-bs-parent="#accordionCursos">';
-                echo '<div class="accordion-body">';
-                echo '<img src="' . $curso['imagen'] . '" class="img-fluid mb-3" alt="Imagen del curso">';
-                echo '<p>' . $curso['descripcion'] . '</p>';
-                echo '<a href="' . $archivo_curso . '" class="btn btn-info mb-2">Ver Curso</a> ';
-                echo '<a href="?eliminar=' . $curso['id'] . '" class="btn btn-danger mb-2">Eliminar Curso</a> ';
-                echo '<a href="editar_curso.php?id=' . $curso['id'] . '" class="btn btn-warning mb-2">Editar Curso</a>';
-                echo '</div>';
-                echo '</div>';
-                echo '</div>';
-            }
-        } else {
-            echo '<p>No hay cursos disponibles.</p>';
-        }
-        ?>
+    <!-- Menú lateral -->
+    <div class="sidebar">
+        <h4 class="text-center mb-4">Menú</h4>
+        <a href="#" onclick="mostrarFormulario()">Registrar Curso</a>
+        <a href="#" onclick="mostrarCursos()">Ver Cursos</a>
     </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Barra superior -->
+    <div class="navbar">
+        <button onclick="toggleSidebar()">☰</button>
+        <h4 class="d-inline-block ms-3">Dashboard de Cursos</h4>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="content">
+        <!-- Vista destacada del curso (oculta por defecto) -->
+        <div id="vistaCurso" class="curso-destacado" style="display: none;">
+            <img id="cursoImagen" src="" alt="Imagen del curso" class="mb-3">
+            <h2 id="cursoTitulo"></h2>
+            <p id="cursoDescripcion"></p>
+        </div>
+
+        <!-- Formulario para agregar un nuevo curso (oculto por defecto) -->
+        <div id="formularioCurso" class="card mb-4" style="display: none;">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">Agregar Nuevo Curso</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="titulo" class="form-label">Título del Curso</label>
+                        <input type="text" name="titulo" id="titulo" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <textarea name="descripcion" id="descripcion" rows="3" class="form-control" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="imagen" class="form-label">Imagen del Curso</label>
+                        <input type="file" name="imagen" id="imagen" class="form-control" required>
+                    </div>
+                    <button type="submit" name="agregar_curso" class="btn btn-success w-100">Agregar Curso</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Lista de cursos -->
+        <div id="listaCursos">
+            <?php
+            $result = $conexion->query("SELECT * FROM cursos");
+            if ($result->num_rows > 0) {
+                while ($curso = $result->fetch_assoc()) {
+                    $archivo_curso = 'Cursos/' . str_replace(' ', '_', $curso['titulo']) . '/Curso_' . str_replace(' ', '_', $curso['titulo']) . '.php';
+                    echo '<div class="card mb-3">';
+                    echo '<div class="card-body">';
+                    echo '<h5 class="card-title">' . $curso['titulo'] . '</h5>';
+                    echo '<img src="' . $curso['imagen'] . '" class="img-curso mb-3" alt="Imagen del curso">';
+                    echo '<p class="card-text">' . $curso['descripcion'] . '</p>';
+                    echo '<button onclick="mostrarCursoDestacado(\'' . $curso['titulo'] . '\', \'' . $curso['descripcion'] . '\', \'' . $curso['imagen'] . '\')" class="btn btn-info btn-custom">Ver Detalles</button> ';
+                    echo '<a href="' . $archivo_curso . '" class="btn btn-primary btn-custom">Ver Curso Completo</a> ';
+                    echo '<a href="?eliminar=' . $curso['id'] . '" class="btn btn-danger btn-custom">Eliminar Curso</a> ';
+                    echo '<a href="editar_curso.php?id=' . $curso['id'] . '" class="btn btn-warning btn-custom">Editar Curso</a>';
+                    echo '</div>';
+                    echo '</div>';
+                }
+            } else {
+                echo '<div class="alert alert-info text-center">No hay cursos disponibles.</div>';
+            }
+            ?>
+        </div>
+    </div>
+
+    <script>
+        // Función para mostrar/ocultar el menú lateral
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const content = document.querySelector('.content');
+            if (sidebar.style.width === '250px') {
+                sidebar.style.width = '0';
+                content.style.marginLeft = '0';
+            } else {
+                sidebar.style.width = '250px';
+                content.style.marginLeft = '250px';
+            }
+        }
+
+        // Función para mostrar el formulario de registro
+        function mostrarFormulario() {
+            document.getElementById('formularioCurso').style.display = 'block';
+            document.getElementById('listaCursos').style.display = 'none';
+            document.getElementById('vistaCurso').style.display = 'none';
+        }
+
+        // Función para mostrar la lista de cursos
+        function mostrarCursos() {
+            document.getElementById('formularioCurso').style.display = 'none';
+            document.getElementById('listaCursos').style.display = 'block';
+            document.getElementById('vistaCurso').style.display = 'none';
+        }
+
+        // Función para mostrar la vista destacada del curso
+        function mostrarCursoDestacado(titulo, descripcion, imagen) {
+            document.getElementById('cursoTitulo').innerText = titulo;
+            document.getElementById('cursoDescripcion').innerText = descripcion;
+            document.getElementById('cursoImagen').src = imagen;
+            document.getElementById('vistaCurso').style.display = 'block';
+            document.getElementById('formularioCurso').style.display = 'none';
+            document.getElementById('listaCursos').style.display = 'none';
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
