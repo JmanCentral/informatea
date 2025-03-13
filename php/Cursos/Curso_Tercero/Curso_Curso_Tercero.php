@@ -5,6 +5,8 @@
     $titulo = 'Curso Tercero'; // Definir la variable título para evitar errores
 
     function listarArchivos($periodo) {
+
+        
         global $conexion, $curso_id;
         $result = $conexion->query("SELECT * FROM tareas WHERE curso_id=$curso_id AND periodo='$periodo'");
         echo '<div class="list-group">';
@@ -20,6 +22,9 @@
         }
         echo '</div>';
     }
+
+    
+    
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['subir_archivo'])) {
         $periodo = $_POST['periodo'];
@@ -53,7 +58,9 @@
     <div class="container mt-5">
         <h1 class="text-center mb-4">Curso: <?php echo $titulo; ?></h1>
 
-        <a href="../php/crear_evaluacion.php?curso_id=<?php echo $curso_id; ?>" class="btn btn-success mb-4">Crear Evaluación</a>
+        <a href="crear_evaluacion.php?curso_id=<?php echo $curso_id; ?>" class="btn btn-success mb-4">Crear Evaluación</a>
+
+        <a href="ver_respuestas.php?curso_id=<?php echo $curso_id; ?>" class="btn btn-success mb-4">Consultar Evaluación</a>
 
         <form method="POST" enctype="multipart/form-data" class="mb-4">
             <div class="row g-3">

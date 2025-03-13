@@ -4,8 +4,8 @@ include 'conexion_be.php'; // Conexión a la base de datos
 session_start(); // Iniciar sesión
 
 // Obtener los datos necesarios de la URL
-$tarea_id = $_GET['tarea_id'] ?? '';  // ID de la tarea original (padre)
-$curso_id = $_GET['curso_id'] ?? '';  // ID del curso
+$tarea_id = $_GET['tarea_id'] ?? '';  
+$curso_id = $_GET['curso_id'] ?? '';  
 $correo_estudiante = $_SESSION['correo'] ?? 'correo_no_definido';
 
 // Validar que los IDs lleguen correctamente

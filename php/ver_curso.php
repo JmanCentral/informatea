@@ -56,6 +56,19 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
 
             if ($tareas->num_rows > 0) {
                 while ($tarea = $tareas->fetch_assoc()) {
+
+// Obtener la evaluación asociada al curso
+    $evaluacion = $conexion->query("SELECT * FROM evaluaciones WHERE curso_id = $curso_id");
+
+    if ($evaluacion->num_rows > 0) {
+    $eval = $evaluacion->fetch_assoc();
+    echo '<a href="ver_evaluacion.php?evaluacion_id=' . $eval['id'] . '" class="btn btn-primary">Ver Evaluación</a>';
+} else {
+    echo '<p>No hay evaluación disponible para este curso.</p>';
+}
+
+
+
                     echo '<div class="mb-3">';
                     echo '<p><strong>' . basename($tarea['archivo']) . '</strong> (' . ucfirst($tarea['tipo']) . ')</p>';
                     echo '<a href="' . $tarea['archivo'] . '" class="btn btn-primary" download>Descargar</a>';
@@ -63,7 +76,6 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
                     // Botón para subir una tarea si es del tipo 'tarea'
                     if ($tarea['tipo'] == 'tarea') {
                         echo '<a href="SubirTarea.php?tarea_id=' . $tarea['id'] . '&curso_id=' . $curso_id . '" class="btn btn-success ms-2">Subir Tarea</a>';
-
                         // Mostrar las tareas subidas por los estudiantes para esta tarea
                         $tareas_alumnos = $conexion->query("SELECT * FROM tareas WHERE tarea_padre_id = " . $tarea['id']);
                         if ($tareas_alumnos->num_rows > 0) {
