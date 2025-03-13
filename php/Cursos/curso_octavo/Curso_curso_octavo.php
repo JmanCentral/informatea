@@ -1,5 +1,5 @@
 
-    <?php
+<?php
     include __DIR__ . '/../../../php/conexion_be.php';
     $curso_id = 73;
     $titulo = 'curso octavo';

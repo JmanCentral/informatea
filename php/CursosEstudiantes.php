@@ -11,107 +11,179 @@ if (isset($_SESSION['rol']) && $_SESSION['rol'] == 2) {
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Cursos</title>
-    <link rel="icon" type="image/x-icon" href="../assets/favicon.ico" />
-    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/simple-line-icons/2.5.5/css/simple-line-icons.min.css" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css" />
-    <link href="../css/styles.css" rel="stylesheet" />
+    <link rel="icon" type="image/x-icon" href="../assets/favicon.ico">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" rel="stylesheet">
+    <link href="../css/styles.css" rel="stylesheet">
+    <style>
+        .curso-izquierda {
+            float: left;
+            width: 48%;
+            margin-right: 2%;
+        }
+        .curso-derecha {
+            float: right;
+            width: 48%;
+            margin-left: 2%;
+        }
+        .clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+    </style>
 </head>
 <body>
-<a class="menu-toggle rounded" href="#"><i class="fas fa-bars"></i></a>
-<nav id="sidebar-wrapper">
-    <ul class="sidebar-nav">
-        <li class="sidebar-brand"><a href="#page-top">Informatea</a></li>
-        <li class="sidebar-nav-item"><a href="#page-top">Mis Cursos</a></li>
-        <li class="sidebar-nav-item"><a href="#contact">Contactanos</a></li>
-        <li class="sidebar-nav-item"><a href="login.php">Cerrar Sesion</a></li>
-    </ul>
-</nav>
-
-<section class="content-section" id="portfolio">
-    <div class="container px-4 px-lg-5">
-        <div class="content-section-heading text-center">
-            <h3 class="text-secondary mb-0">Cursos</h3>
-            <h2 class="mb-5">Lo Mejor para Divertirse y Aprender</h2>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">Informatea</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#">Mis Cursos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contact">Contáctanos</a></li>
+                    <li class="nav-item"><a class="nav-link btn btn-danger text-white" href="login.php">Cerrar Sesión</a></li>
+                </ul>
+            </div>
         </div>
-        <div class="row gx-0">
-            <?php
-            // Obtener todos los cursos
-            $result = $conexion->query("SELECT * FROM cursos");
+    </nav>
+    
+    <section class="content-section" id="portfolio">
+        <div class="container px-4 px-lg-5">
+            <div class="content-section-heading text-center">
+                <h2 class="text-secondary mb-0">Cursos</h2>
+                <h3 class="mb-5">Lo Mejor para Divertirse y Aprender</h3>
+            </div>
+            <div class="row gx-0 clearfix">
+                <?php
+                // Obtener todos los cursos
+                $result = $conexion->query("SELECT * FROM cursos");
 
-            while ($curso = $result->fetch_assoc()) {
-                echo '<div class="col-lg-6">';
-                echo '  <a class="portfolio-item" href="ver_curso.php?id=' . $curso['id'] . '">';
-                echo '    <div class="caption">';
-                echo '      <div class="caption-content">';
-                echo '        <div class="h2">' . $curso['titulo'] . '</div>';
-                echo '        <p class="mb-0">' . $curso['descripcion'] . '</p>';
-                echo '      </div>';
-                echo '    </div>';
-                echo '    <img class="img-fluid" src="' . $curso['imagen'] . '" alt="Imagen del curso" />';
-                echo '  </a>';
-                echo '</div>';
-            
-                // Obtener los comentarios del curso actual
-                $comentarios = $conexion->query("SELECT * FROM comentarios WHERE curso_id = " . $curso['id'] . " ORDER BY fecha DESC");
-            
-                if ($comentarios->num_rows > 0) {
-                    echo '<div class="mt-3">';
-                    echo '<h4>Comentarios:</h4>';
-                    while ($comentario = $comentarios->fetch_assoc()) {
-                        echo '<div class="mb-3">';
-                        echo '<p><strong>' . $comentario['estudiante_correo'] . '</strong> (' . $comentario['fecha'] . ')</p>';
-                        echo '<p>' . $comentario['comentario'] . '</p>';
-                        echo '</div>';
-                    }
+                $toggle = true; // Variable para alternar entre izquierda y derecha
+
+                while ($curso = $result->fetch_assoc()) {
+                    $class = $toggle ? 'curso-izquierda' : 'curso-derecha';
+                    $toggle = !$toggle; // Alternar el valor de toggle
+
+                    echo '<div class="' . $class . '">';
+                    echo '  <div class="card shadow-sm">';
+                    echo '    <img class="card-img-top" src="' . $curso['imagen'] . '" alt="Imagen del curso">';
+                    echo '    <div class="card-body">';
+                    echo '      <h3 class="card-title">' . $curso['titulo'] . '</h3>';
+                    echo '      <p class="card-text">' . $curso['descripcion'] . '</p>';
+                    echo '      <div class="d-flex justify-content-between align-items-center">';
+                    echo '        <a href="ver_curso.php?id=' . $curso['id'] . '" class="btn btn-primary">Ver Curso</a>';
+                    echo '        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalComentario' . $curso['id'] . '">Agregar Comentario</button>';
+                    echo '        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#modalVerComentarios' . $curso['id'] . '">Ver Comentarios</button>';
+                    echo '      </div>';
+                    echo '    </div>';
+                    echo '  </div>';
                     echo '</div>';
-                } else {
-                    echo '<p>No hay comentarios para este curso.</p>';
+
+                    // Modal para agregar comentarios
+                    echo '<div class="modal fade" id="modalComentario' . $curso['id'] . '" tabindex="-1" aria-labelledby="modalComentarioLabel' . $curso['id'] . '" aria-hidden="true">';
+                    echo '  <div class="modal-dialog">';
+                    echo '    <div class="modal-content">';
+                    echo '      <div class="modal-header">';
+                    echo '        <h5 class="modal-title" id="modalComentarioLabel' . $curso['id'] . '">Agregar Comentario</h5>';
+                    echo '        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>';
+                    echo '      </div>';
+                    echo '      <div class="modal-body">';
+                    echo '        <form id="formComentario' . $curso['id'] . '" class="form-comentario">';
+                    echo '          <input type="hidden" name="curso_id" value="' . $curso['id'] . '">';
+                    echo '          <div class="form-group">';
+                    echo '            <label for="comentario">Comentario:</label>';
+                    echo '            <textarea class="form-control" id="comentario" name="comentario" rows="3" required></textarea>';
+                    echo '          </div>';
+                    echo '          <button type="submit" class="btn btn-primary mt-3">Guardar Comentario</button>';
+                    echo '        </form>';
+                    echo '      </div>';
+                    echo '    </div>';
+                    echo '  </div>';
+                    echo '</div>';
+
+                    // Modal para ver comentarios
+                    echo '<div class="modal fade" id="modalVerComentarios' . $curso['id'] . '" tabindex="-1" aria-labelledby="modalVerComentariosLabel' . $curso['id'] . '" aria-hidden="true">';
+                    echo '  <div class="modal-dialog modal-lg">';
+                    echo '    <div class="modal-content">';
+                    echo '      <div class="modal-header">';
+                    echo '        <h5 class="modal-title" id="modalVerComentariosLabel' . $curso['id'] . '">Comentarios del Curso: ' . $curso['titulo'] . '</h5>';
+                    echo '        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>';
+                    echo '      </div>';
+                    echo '      <div class="modal-body">';
+                    // Obtener comentarios
+                    $comentarios = $conexion->query("SELECT * FROM comentarios WHERE curso_id = " . $curso['id'] . " ORDER BY fecha DESC");
+                    if ($comentarios->num_rows > 0) {
+                        while ($comentario = $comentarios->fetch_assoc()) {
+                            echo '<div class="border-bottom pb-2 mb-2">';
+                            echo '<p><strong>' . $comentario['estudiante_correo'] . '</strong> (' . $comentario['fecha'] . ')</p>';
+                            echo '<p>' . $comentario['comentario'] . '</p>';
+                            echo '</div>';
+                        }
+                    } else {
+                        echo '<p class="text-muted">No hay comentarios para este curso.</p>';
+                    }
+                    echo '      </div>';
+                    echo '      <div class="modal-footer">';
+                    echo '        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>';
+                    echo '      </div>';
+                    echo '    </div>';
+                    echo '  </div>';
+                    echo '</div>';
                 }
-            
-                // Formulario para agregar comentarios
-                echo '<div class="mt-3">';
-                echo '<h4>Agregar Comentario:</h4>';
-                echo '<form action="insertar_comentario.php" method="POST">';
-                echo '  <input type="hidden" name="curso_id" value="' . $curso['id'] . '">';
-                echo '  <div class="form-group">';
-                echo '    <label for="comentario">Comentario:</label>';
-                echo '    <textarea class="form-control" id="comentario" name="comentario" rows="3" required></textarea>';
-                echo '  </div>';
-                echo '  <button type="submit" class="btn btn-primary">Enviar Comentario</button>';
-                echo '</form>';
-                echo '</div>';
-            }
-            
-
-            $conexion->close();
-            ?>
+                $conexion->close();
+                ?>
+            </div>
         </div>
-    </div>
-</section>
+    </section>
+    
+    <footer class="footer bg-dark text-white text-center py-4">
+        <div class="container">
+            <p class="mb-1">&copy; 2025 Informatea - Todos los derechos reservados.</p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="#" class="text-white"><i class="fab fa-facebook fa-lg"></i></a>
+                <a href="#" class="text-white"><i class="fab fa-twitter fa-lg"></i></a>
+                <a href="#" class="text-white"><i class="fab fa-github fa-lg"></i></a>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Scripts de Bootstrap y jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<footer class="footer text-center">
-    <div class="container px-4 px-lg-5">
-        <ul class="list-inline mb-5">
-            <li class="list-inline-item">
-                <a class="social-link rounded-circle text-white mr-3" href="https://sicompuclinic.com/"><i class="icon-social-facebook"></i></a>
-            </li>
-            <li class="list-inline-item">
-                <a class="social-link rounded-circle text-white mr-3" href="https://www.instagram.com/sicompuclinic_/profilecard/?igsh=bHlvYzdueWdyNzBk"><i class="icon-social-twitter"></i></a>
-            </li>
-            <li class="list-inline-item">
-                <a class="social-link rounded-circle text-white" href="#"><i class="icon-social-github"></i></a>
-            </li>
-        </ul>
-        <p class="text-muted small mb-0">Copyright &copy; Sicompuclinic</p>
-    </div>
-</footer>
+    <!-- Script para manejar el envío de comentarios con AJAX -->
+    <script>
+        $(document).ready(function() {
+            // Manejar el envío de comentarios
+            $('.form-comentario').on('submit', function(e) {
+                e.preventDefault(); // Evita que el formulario se envíe de forma tradicional
 
-<a class="scroll-to-top rounded" href="#page-top"><i class="fas fa-angle-up"></i></a>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="../js/scripts.js"></script>
+                var form = $(this);
+                var url = 'insertar_comentario.php';
+                var formData = form.serialize(); // Serializa los datos del formulario
+
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    data: formData,
+                    success: function(response) {
+                        // Cierra el modal
+                        form.closest('.modal').modal('hide');
+                        // Recarga la página para mostrar el nuevo comentario
+                        location.reload();
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Error al agregar el comentario. Inténtalo de nuevo.');
+                    }
+                });
+            });
+        });
+    </script>
 </body>
-</html
+</html>
