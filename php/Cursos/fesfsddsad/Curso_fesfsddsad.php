@@ -1,8 +1,8 @@
 
     <?php
     include __DIR__ . '/../../../php/conexion_be.php';
-    $curso_id = 81;
-    $titulo = 'Curso quinto';
+    $curso_id = 80;
+    $titulo = 'fesfsddsad';
 
     // Función para listar archivos y agregar la opción de eliminar
     function listarArchivos($periodo) {
@@ -18,7 +18,6 @@
             echo '<div>';
             echo '<a href="' . $archivo_path . '" class="btn btn-primary btn-sm me-2" download>Descargar</a>';
             echo '<a href="../../../php/TareasSubidas.php?periodo=' . $archivo['periodo'] . '&tarea_id=' . $archivo['id'] . '" class="btn btn-warning btn-sm me-2">Ver Tareas Subidas</a>';
-            echo '<a href="../../../php/EliminarTarea.php?id=' . $archivo['id'] . '&archivo=' . urlencode($archivo['archivo']) . '" class="btn btn-danger btn-sm" onclick="return confirm(\'¿Estás seguro de eliminar esta tarea?\');">Eliminar</a>';
             echo '</div>';
             echo '</div>';
         }
@@ -136,12 +135,11 @@
         <!-- Menú lateral -->
         <div class="sidebar" id="sidebar">
             <h4 class="text-center mb-4">Menú</h4>
-            <a href="../../../php/crear_evaluacion.php?curso_id=<?php echo $curso_id; ?>">Crear Evaluación</a>
-            <a href="../../../php/ver_respuestas.php?curso_id=<?php echo $curso_id; ?>">Consultar Evaluación</a>
-            <a href="../../../php/ver_comentarios.php?curso_id=<?php echo $curso_id; ?>">Ver Comentarios</a>
-            <a href="../../../php/agregar_curso.php">Agregar Curso</a>
+            <a href="#" onclick="mostrarFormulario()">Crear Evaluación</a>
+            <a href="#" onclick="mostrarEvaluaciones()">Consultar Evaluación</a>
+            <a href="#" onclick="mostrarComentarios()">Ver Comentarios</a>
             <a href="#" onclick="mostrarPeriodos()">Ver Periodos</a>
-            <a href="../../../php/logout.php" class="logout">Cerrar Sesión</a>
+            <a href="#" class="logout" onclick="confirmarCerrarSesion()">Cerrar Sesión</a>
         </div>
 
         <!-- Barra superior -->
@@ -205,6 +203,7 @@
             </div>
         </div>
 
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script>
             // Función para mostrar/ocultar el menú lateral
             function toggleSidebar() {
@@ -212,12 +211,19 @@
                 document.getElementById('content').classList.toggle('active');
             }
 
-            // Función para mostrar los periodos
-            function mostrarPeriodos() {
-                alert('Mostrando periodos...');
+            function mostrarEvaluaciones() {
+                if (confirm("Evaluación")) {
+                    window.location.href = '../../../php/ver_evaluacion';
+                }
+            }
+
+            // Función para cerrar sesión
+            function confirmarCerrarSesion() {
+                if (confirm("¿Estás seguro de que quieres cerrar sesión?")) {
+                    window.location.href = '../../../php/logout.php';
+                }
             }
         </script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     </body>
     </html>
     
