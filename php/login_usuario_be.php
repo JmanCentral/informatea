@@ -20,23 +20,18 @@ if (mysqli_num_rows($validar_login) > 0) {
     // Guardar el correo del usuario en la sesión
     $_SESSION['correo'] = $correo;
 
-    // Redirigir según el rol del usuario
-    if ($rol == 2) {
-        header("Location: CursosEstudiantes.php");
-    } elseif ($rol == 1) {
-        header("Location: Profesor.php");
-    } elseif ($rol == 3) {
-        header("Location: Administrador.php");
-    }
+    // Devolver una respuesta JSON
+    echo json_encode([
+        'success' => true,
+        'redirect' => $rol == 2 ? 'CursosEstudiantes.php' : ($rol == 1 ? 'Profesor.php' : 'Administrador.php')
+    ]);
     exit();
 } else {
-    // Si los datos no son válidos, mostrar un mensaje de error y redirigir al login
-    echo '
-    <script>
-        alert("Usuario no existe, por favor verifique los datos ingresados");
-        window.location="login.php";
-    </script>
-    ';
+    // Devolver una respuesta JSON con el mensaje de error
+    echo json_encode([
+        'success' => false,
+        'message' => 'Usuario o contraseña incorrectos. Por favor, verifique los datos ingresados.'
+    ]);
     exit();
 }
 ?>

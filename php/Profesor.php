@@ -303,9 +303,13 @@ function crearEstructuraCurso($titulo, $id_curso) {
             color: white;
             position: fixed;
             top: 0;
-            left: 0;
+            left: -250px;
             overflow-y: auto;
             padding-top: 20px;
+            transition: left 0.3s;
+        }
+        .sidebar.active {
+            left: 0;
         }
         .sidebar a {
             color: white;
@@ -317,8 +321,13 @@ function crearEstructuraCurso($titulo, $id_curso) {
             background-color: #495057;
         }
         .content {
-            margin-left: 250px;
+            margin-left: 0;
             padding: 20px;
+            transition: margin-left 0.3s;
+            margin-top: 60px; /* Añade este margen superior */
+        }
+        .content.active {
+            margin-left: 250px;
         }
         .navbar {
             background-color: #007bff;
@@ -326,9 +335,12 @@ function crearEstructuraCurso($titulo, $id_curso) {
             padding: 10px 20px;
             position: fixed;
             top: 0;
-            left: 250px;
+            left: 0;
             right: 0;
             z-index: 1000;
+            display: flex;
+            align-items: center;
+            height: 60px; /* Asegúrate de que la altura sea consistente */
         }
         .navbar button {
             background: none;
@@ -336,52 +348,45 @@ function crearEstructuraCurso($titulo, $id_curso) {
             color: white;
             font-size: 1.5rem;
         }
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
         .card {
-            margin-bottom: 20px;
+            flex: 1 1 calc(50% - 20px); /* Dos columnas con espacio entre ellas */
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        .img-curso {
-            max-width: 100%;
-            height: auto;
-            border-radius: 10px;
+        .card img {
+            max-width: 100%; /* La imagen no superará el ancho de la tarjeta */
+            height: 200px; /* Altura fija para todas las imágenes */
+            object-fit: cover; /* Ajusta la imagen manteniendo la proporción */
+            border-radius: 10px 10px 0 0; /* Bordes redondeados solo en la parte superior */
         }
-        .curso-destacado {
-            text-align: center;
-            padding: 20px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .curso-destacado img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 10px;
+        .logout {
+            margin-left: auto;
+            cursor: pointer;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
     <!-- Menú lateral -->
-    <div class="sidebar">
+    <div class="sidebar" id="sidebar">
         <h4 class="text-center mb-4">Menú</h4>
         <a href="#" onclick="mostrarFormulario()">Registrar Curso</a>
         <a href="#" onclick="mostrarCursos()">Ver Cursos</a>
+        <a href="#" class="logout" onclick="confirmarCerrarSesion()">Cerrar Sesión</a>
     </div>
 
     <!-- Barra superior -->
     <div class="navbar">
         <button onclick="toggleSidebar()">☰</button>
-        <h4 class="d-inline-block ms-3">Dashboard de Cursos</h4>
+        <h4 class="ms-3">Dashboard de Cursos</h4>
     </div>
 
     <!-- Contenido principal -->
-    <div class="content">
-        <!-- Vista destacada del curso (oculta por defecto) -->
-        <div id="vistaCurso" class="curso-destacado" style="display: none;">
-            <img id="cursoImagen" src="" alt="Imagen del curso" class="mb-3">
-            <h2 id="cursoTitulo"></h2>
-            <p id="cursoDescripcion"></p>
-        </div>
-
+    <div class="content" id="content">
         <!-- Formulario para agregar un nuevo curso (oculto por defecto) -->
         <div id="formularioCurso" class="card mb-4" style="display: none;">
             <div class="card-header bg-primary text-white">
@@ -406,17 +411,18 @@ function crearEstructuraCurso($titulo, $id_curso) {
             </div>
         </div>
 
-        <!-- Lista de cursos -->
-        <div id="listaCursos">
+        <!-- Lista de cursos en dos columnas -->
+        <div class="card-container" id="listaCursos">
             <?php
+            // Conexión a la base de datos (asegúrate de que $conexion esté definido)
             $result = $conexion->query("SELECT * FROM cursos");
             if ($result->num_rows > 0) {
                 while ($curso = $result->fetch_assoc()) {
                     $archivo_curso = 'Cursos/' . str_replace(' ', '_', $curso['titulo']) . '/Curso_' . str_replace(' ', '_', $curso['titulo']) . '.php';
-                    echo '<div class="card mb-3">';
+                    echo '<div class="card">';
                     echo '<div class="card-body">';
+                    echo '<img src="' . $curso['imagen'] . '" alt="Imagen del curso">';
                     echo '<h5 class="card-title">' . $curso['titulo'] . '</h5>';
-                    echo '<img src="' . $curso['imagen'] . '" class="img-curso mb-3" alt="Imagen del curso">';
                     echo '<p class="card-text">' . $curso['descripcion'] . '</p>';
                     echo '<button onclick="mostrarCursoDestacado(\'' . $curso['titulo'] . '\', \'' . $curso['descripcion'] . '\', \'' . $curso['imagen'] . '\')" class="btn btn-info btn-custom">Ver Detalles</button> ';
                     echo '<a href="' . $archivo_curso . '" class="btn btn-primary btn-custom">Ver Curso Completo</a> ';
@@ -432,42 +438,45 @@ function crearEstructuraCurso($titulo, $id_curso) {
         </div>
     </div>
 
+    <script src="../js/confirmDialog.js"></script>
+
     <script>
         // Función para mostrar/ocultar el menú lateral
         function toggleSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            const content = document.querySelector('.content');
-            if (sidebar.style.width === '250px') {
-                sidebar.style.width = '0';
-                content.style.marginLeft = '0';
-            } else {
-                sidebar.style.width = '250px';
-                content.style.marginLeft = '250px';
-            }
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('content').classList.toggle('active');
+        }
+
+        // Función para cerrar sesión
+        function confirmarCerrarSesion() {
+            showConfirmDialog(
+                "¿Estás seguro de que quieres cerrar sesión?",
+                function () {
+                    // Si el usuario confirma, redirigir a logout.php
+                    window.location.href = 'logout.php';
+                },
+                function () {
+                    // Si el usuario cancela, no hacer nada
+                    console.log("Cierre de sesión cancelado.");
+                }
+            );
         }
 
         // Función para mostrar el formulario de registro
         function mostrarFormulario() {
             document.getElementById('formularioCurso').style.display = 'block';
             document.getElementById('listaCursos').style.display = 'none';
-            document.getElementById('vistaCurso').style.display = 'none';
         }
 
         // Función para mostrar la lista de cursos
         function mostrarCursos() {
             document.getElementById('formularioCurso').style.display = 'none';
-            document.getElementById('listaCursos').style.display = 'block';
-            document.getElementById('vistaCurso').style.display = 'none';
+            document.getElementById('listaCursos').style.display = 'flex';
         }
 
         // Función para mostrar la vista destacada del curso
         function mostrarCursoDestacado(titulo, descripcion, imagen) {
-            document.getElementById('cursoTitulo').innerText = titulo;
-            document.getElementById('cursoDescripcion').innerText = descripcion;
-            document.getElementById('cursoImagen').src = imagen;
-            document.getElementById('vistaCurso').style.display = 'block';
-            document.getElementById('formularioCurso').style.display = 'none';
-            document.getElementById('listaCursos').style.display = 'none';
+            alert(`Curso: ${titulo}\nDescripción: ${descripcion}\nImagen: ${imagen}`);
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

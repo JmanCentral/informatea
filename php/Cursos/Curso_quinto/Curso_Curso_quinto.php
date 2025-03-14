@@ -1,8 +1,8 @@
 
     <?php
     include __DIR__ . '/../../../php/conexion_be.php';
-    $curso_id = 76;
-    $titulo = 'curso sexto';
+    $curso_id = 78;
+    $titulo = 'Curso quinto';
 
     // Función para listar archivos y agregar la opción de eliminar
     function listarArchivos($periodo) {
