@@ -2,6 +2,8 @@
 // Incluir la conexión a la base de datos
 include 'conexion_be.php';
 
+$curso_id = $_GET['curso_id'] ?? '';  
+
 // Verificar si se ha enviado el formulario
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['subir_archivo'])) {
     // Obtener los datos del formulario
@@ -18,14 +20,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['subir_archivo'])) {
         if (!empty($archivo)) {
             $ruta_destino = 'Cursos/' . $curso_id . '/' . $archivo;
             if (move_uploaded_file($ruta_temporal, $ruta_destino)) {
-                // Guardar la ruta del archivo en la base de datos
+                // Insertar la nueva tarea en la base de datos
                 $conexion->query("INSERT INTO tareas (curso_id, periodo, archivo, tipo) VALUES ($curso_id, '$periodo', '$ruta_destino', '$tipo')");
                 echo '<p class="alert alert-success">Archivo subido correctamente.</p>';
             } else {
                 echo '<p class="alert alert-danger">Error al subir el archivo.</p>';
             }
         } elseif (!empty($texto)) {
-            // Guardar el texto en la base de datos
+            // Insertar la nueva tarea en la base de datos
             $conexion->query("INSERT INTO tareas (curso_id, periodo, archivo, tipo) VALUES ($curso_id, '$periodo', '$texto', 'texto')");
             echo '<p class="alert alert-success">Texto guardado correctamente.</p>';
         }

@@ -139,7 +139,7 @@
             <a href="../../../php/crear_evaluacion.php?curso_id=<?php echo $curso_id; ?>">Crear Evaluación</a>
             <a href="../../../php/ver_respuestas.php?curso_id=<?php echo $curso_id; ?>">Consultar Evaluación</a>
             <a href="../../../php/ver_comentarios.php?curso_id=<?php echo $curso_id; ?>">Ver Comentarios</a>
-            <a href="../../../php/agregar_tarea.php">Agregar Tarea</a>
+            <a href="../../../php/agregar_tarea.php?curso_id=<?php echo $curso_id; ?>">Agregar tarea</a>
             <a href="#" onclick="mostrarPeriodos()">Ver Periodos</a>
             <a href="../../../php/logout.php" class="logout">Cerrar Sesión</a>
         </div>
