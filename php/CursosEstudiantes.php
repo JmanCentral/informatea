@@ -2,9 +2,10 @@
 session_start();
 include 'conexion_be.php'; // Conexión a la base de datos
 
-// Verifica que el rol sea 2 para mostrar la opción
-if (isset($_SESSION['rol']) && $_SESSION['rol'] == 2) {
-    echo '<li><a href="CursosEstudiantes.php">Cursos Estudiantes</a></li>';
+// Verificar si el usuario está autenticado y si su rol es 2
+if (!isset($_SESSION['correo_estudiante'])) {
+    header('Location: login.php'); // Redirigir al login si no está autenticado
+    exit();
 }
 ?>
 
@@ -47,7 +48,10 @@ if (isset($_SESSION['rol']) && $_SESSION['rol'] == 2) {
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="#">Mis Cursos</a></li>
                     <li class="nav-item"><a class="nav-link" href="#contact">Contáctanos</a></li>
-                    <li class="nav-item"><a class="nav-link btn btn-danger text-white" href="login.php">Cerrar Sesión</a></li>
+                    <li class="nav-item">
+                        <span class="nav-link text-white">Bienvenido, <?php echo $_SESSION['correo_estudiante']; ?></span>
+                    </li>
+                    <li class="nav-item"><a class="nav-link btn btn-danger text-white" href="logout.php">Cerrar Sesión</a></li>
                 </ul>
             </div>
         </div>
@@ -96,6 +100,7 @@ if (isset($_SESSION['rol']) && $_SESSION['rol'] == 2) {
                     echo '      <div class="modal-body">';
                     echo '        <form id="formComentario' . $curso['id'] . '" class="form-comentario">';
                     echo '          <input type="hidden" name="curso_id" value="' . $curso['id'] . '">';
+                    echo '          <input type="hidden" name="estudiante_correo" value="' . $_SESSION['correo_estudiante'] . '">'; // Campo oculto con el correo
                     echo '          <div class="form-group">';
                     echo '            <label for="comentario">Comentario:</label>';
                     echo '            <textarea class="form-control" id="comentario" name="comentario" rows="3" required></textarea>';
@@ -159,31 +164,46 @@ if (isset($_SESSION['rol']) && $_SESSION['rol'] == 2) {
 
     <!-- Script para manejar el envío de comentarios con AJAX -->
     <script>
-        $(document).ready(function() {
-            // Manejar el envío de comentarios
-            $('.form-comentario').on('submit', function(e) {
-                e.preventDefault(); // Evita que el formulario se envíe de forma tradicional
+       $(document).ready(function() {
+    // Manejar el envío de comentarios
+    $('.form-comentario').on('submit', function(e) {
+        e.preventDefault(); // Evita que el formulario se envíe de forma tradicional
 
-                var form = $(this);
-                var url = 'insertar_comentario.php';
-                var formData = form.serialize(); // Serializa los datos del formulario
+        var form = $(this);
+        var curso_id = form.find('input[name="curso_id"]').val(); // Obtener el ID del curso
+        var comentario = form.find('textarea[name="comentario"]').val(); // Obtener el comentario
 
-                $.ajax({
-                    type: 'POST',
-                    url: url,
-                    data: formData,
-                    success: function(response) {
-                        // Cierra el modal
-                        form.closest('.modal').modal('hide');
-                        // Recarga la página para mostrar el nuevo comentario
-                        location.reload();
-                    },
-                    error: function(xhr, status, error) {
-                        alert('Error al agregar el comentario. Inténtalo de nuevo.');
-                    }
-                });
-            });
+        // Validar que el comentario no esté vacío
+        if (!comentario.trim()) {
+            alert("El comentario no puede estar vacío.");
+            return;
+        }
+
+        // Enviar los datos al servidor en formato JSON
+        $.ajax({
+            type: 'POST',
+            url: 'insertar_comentario.php',
+            contentType: 'application/json', // Indicar que se envía JSON
+            data: JSON.stringify({ // Convertir los datos a JSON
+                curso_id: curso_id,
+                comentario: comentario
+            }),
+            success: function(response) {
+                var result = JSON.parse(response); // Parsear la respuesta JSON
+                if (result.success) {
+                    alert(result.success); // Mostrar mensaje de éxito
+                    form.closest('.modal').modal('hide'); // Cerrar el modal
+                    location.reload(); // Recargar la página
+                } else if (result.error) {
+                    alert(result.error); // Mostrar mensaje de error
+                }
+            },
+            error: function(xhr, status, error) {
+                alert("Error al agregar el comentario. Inténtalo de nuevo.");
+            }
         });
+    });
+});
     </script>
 </body>
 </html>

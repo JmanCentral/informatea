@@ -1,46 +1,87 @@
 
     <?php
     include __DIR__ . '/../../../php/conexion_be.php';
-    $curso_id = 82;
-    $titulo = 'curso noveno';
+    $curso_id = 96;
+    $titulo = 'curso aprendizaje';
 
-    // Función para listar archivos y agregar la opción de eliminar
-    function listarArchivos($periodo) {
+    // Función para listar respuestas de estudiantes por periodo
+    function listarRespuestas($periodo) {
         global $conexion, $curso_id;
-        $result = $conexion->query("SELECT * FROM tareas WHERE curso_id=$curso_id AND periodo='$periodo'");
-        echo '<div class="list-group">';
-        while ($archivo = $result->fetch_assoc()) {
-            $archivo_path = $archivo['archivo'];
-            echo '<div class="list-group-item d-flex justify-content-between align-items-center">';
-            echo '<div>';
-            echo '<p><strong>' . basename($archivo_path) . '</strong> - ' . ucfirst($archivo['tipo']) . '</p>';
-            echo '</div>';
-            echo '<div>';
-            echo '<a href="' . $archivo_path . '" class="btn btn-primary btn-sm me-2" download>Descargar</a>';
-            echo '<a href="../../../php/TareasSubidas.php?periodo=' . $archivo['periodo'] . '&tarea_id=' . $archivo['id'] . '" class="btn btn-warning btn-sm me-2">Ver Tareas Subidas</a>';
-            echo '<a href="../../../php/EliminarTarea.php?id=' . $archivo['id'] . '&archivo=' . urlencode($archivo['archivo']) . '" class="btn btn-danger btn-sm" onclick="return confirm(\'¿Estás seguro de eliminar esta tarea?\');">Eliminar</a>';
-            echo '</div>';
-            echo '</div>';
-        }
-        echo '</div>';
-    }
 
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['subir_archivo'])) {
-        $periodo = $_POST['periodo'];
-        $tipo = $_POST['tipo'];
-        $texto = $_POST['texto'] ?? '';
-        $archivo = $_FILES['archivo']['name'] ?? '';
-        $ruta = __DIR__ . '/' . $archivo;
+        // Obtener las tareas del periodo
+        $tareas = $conexion->query("SELECT id FROM tareas WHERE curso_id = $curso_id AND periodo = '$periodo'");
 
-        if (!empty($archivo) && move_uploaded_file($_FILES['archivo']['tmp_name'], $ruta)) {
-            $ruta_relativa = 'Cursos/' . basename(__DIR__) . '/' . $archivo;
-            $conexion->query("INSERT INTO tareas (curso_id, periodo, archivo, tipo) VALUES ($curso_id, '$periodo', '$ruta_relativa', '$tipo')");
-            echo '<p class="alert alert-success">Archivo subido correctamente.</p>';
-        } elseif (!empty($texto)) {
-            $conexion->query("INSERT INTO tareas (curso_id, periodo, archivo, tipo) VALUES ($curso_id, '$periodo', '$texto', 'texto')");
-            echo '<p class="alert alert-success">Texto guardado correctamente.</p>';
+        if ($tareas->num_rows > 0) {
+            echo '<table class="table table-bordered">';
+            echo '<thead>';
+            echo '<tr>';
+            echo '<th>Estudiante</th>';
+            echo '<th>Archivo</th>';
+            echo '<th>Texto</th>';
+            echo '<th>Calificación</th>';
+            echo '<th>Acciones</th>';
+            echo '</tr>';
+            echo '</thead>';
+            echo '<tbody>';
+
+            while ($tarea = $tareas->fetch_assoc()) {
+                // Obtener las respuestas de los estudiantes para esta tarea
+                $respuestas = $conexion->query("SELECT * FROM respuestas_tareas WHERE tarea_id = " . $tarea['id']);
+
+                if ($respuestas->num_rows > 0) {
+                    while ($respuesta = $respuestas->fetch_assoc()) {
+                        echo '<tr>';
+                        echo '<td>' . $respuesta['estudiante_correo'] . '</td>';
+                        echo '<td>';
+                        if (!empty($respuesta['archivo'])) {
+                            $ruta_archivo = 'Cursos/Respuestas/' . basename($respuesta['archivo']);
+                            echo '<!-- Ruta construida: ' . $ruta_archivo . ' -->';
+                            echo '<a href="' . $ruta_archivo . '" download>' . basename($respuesta['archivo']) . '</a>';
+                        } else {
+                            echo 'N/A';
+                        }
+                        echo '</td>';
+                        echo '<td>' . ($respuesta['texto'] ?? 'N/A') . '</td>';
+                        echo '<td>' . ($respuesta['calificacion'] ?? 'Sin calificar') . '</td>';
+                        echo '<td>';
+                        echo '<button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#calificarModal' . $respuesta['id'] . '">
+                                <i class="bi bi-pencil-square"></i> Calificar
+                              </button>';
+
+                        // Modal para calificar la respuesta
+                        echo '
+                        <div class="modal fade" id="calificarModal' . $respuesta['id'] . '" tabindex="-1" aria-labelledby="calificarModalLabel' . $respuesta['id'] . '" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="calificarModalLabel' . $respuesta['id'] . '">Calificar Respuesta</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form method="POST" action="guardar_calificacion.php">
+                                            <input type="hidden" name="respuesta_id" value="' . $respuesta['id'] . '">
+                                            <div class="mb-3">
+                                                <label for="calificacion" class="form-label">Calificación</label>
+                                                <input type="number" name="calificacion" id="calificacion" class="form-control" min="0" max="10" step="0.1" required>
+                                            </div>
+                                            <button type="submit" name="guardar_calificacion" class="btn btn-primary">Guardar Calificación</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>';
+                        echo '</td>';
+                        echo '</tr>';
+                    }
+                } else {
+                    echo '<tr><td colspan="5">No hay respuestas subidas por los estudiantes.</td></tr>';
+                }
+            }
+
+            echo '</tbody>';
+            echo '</table>';
         } else {
-            echo '<p class="alert alert-danger">Error al subir el archivo o enviar el texto.</p>';
+            echo '<p class="text-muted">No hay tareas en este periodo.</p>';
         }
     }
     ?>
@@ -52,6 +93,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Curso <?php echo $titulo; ?></title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
         <style>
             body {
                 margin: 0;
@@ -110,21 +152,6 @@
                 color: white;
                 font-size: 1.5rem;
             }
-            .card-container {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 20px;
-            }
-            .card {
-                flex: 1 1 calc(50% - 20px);
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            }
-            .card img {
-                max-width: 100%;
-                height: 200px;
-                object-fit: cover;
-                border-radius: 10px 10px 0 0;
-            }
             .logout {
                 margin-left: auto;
                 cursor: pointer;
@@ -139,8 +166,9 @@
             <a href="../../../php/crear_evaluacion.php?curso_id=<?php echo $curso_id; ?>">Crear Evaluación</a>
             <a href="../../../php/ver_respuestas.php?curso_id=<?php echo $curso_id; ?>">Consultar Evaluación</a>
             <a href="../../../php/ver_comentarios.php?curso_id=<?php echo $curso_id; ?>">Ver Comentarios</a>
-            <a href="../../../php/agregar_tarea.php?curso_id=<?php echo $curso_id; ?>">Agregar tarea</a>
+            <a href="../../../php/agregar_tarea.php?curso_id=<?php echo $curso_id; ?>">Ver Tareas</a>
             <a href="#" onclick="mostrarPeriodos()">Ver Periodos</a>
+            <a href="../../../php/profesor.php">Volver a Cursos</a> <!-- Nuevo enlace para volver a los cursos generales -->
             <a href="../../../php/logout.php" class="logout">Cerrar Sesión</a>
         </div>
 
@@ -162,7 +190,7 @@
                     </h2>
                     <div id="collapseOne" class="accordion-collapse collapse show">
                         <div class="accordion-body">
-                            <?php listarArchivos('primer_periodo'); ?>
+                            <?php listarRespuestas('primer_periodo'); ?>
                         </div>
                     </div>
                 </div>
@@ -174,7 +202,7 @@
                     </h2>
                     <div id="collapseTwo" class="accordion-collapse collapse show">
                         <div class="accordion-body">
-                            <?php listarArchivos('segundo_periodo'); ?>
+                            <?php listarRespuestas('segundo_periodo'); ?>
                         </div>
                     </div>
                 </div>
@@ -186,7 +214,7 @@
                     </h2>
                     <div id="collapseThree" class="accordion-collapse collapse show">
                         <div class="accordion-body">
-                            <?php listarArchivos('tercer_periodo'); ?>
+                            <?php listarRespuestas('tercer_periodo'); ?>
                         </div>
                     </div>
                 </div>
@@ -198,7 +226,7 @@
                     </h2>
                     <div id="collapseFour" class="accordion-collapse collapse show">
                         <div class="accordion-body">
-                            <?php listarArchivos('cuarto_periodo'); ?>
+                            <?php listarRespuestas('cuarto_periodo'); ?>
                         </div>
                     </div>
                 </div>

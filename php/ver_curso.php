@@ -31,60 +31,30 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Material del Curso: <?php echo $curso['titulo']; ?></title>
+    <title>Curso: <?php echo $curso['titulo']; ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 <div class="container mt-5">
-    <h1 class="text-center mb-4"><?php echo $curso['titulo']; ?></h1>
+    <h1 class="text-center mb-4">Curso: <?php echo $curso['titulo']; ?></h1>
 
-    <!-- Acordeón para las evaluaciones -->
-    <div class="accordion mb-4" id="accordionEvaluaciones">
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="headingEvaluaciones">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEvaluaciones" aria-expanded="true" aria-controls="collapseEvaluaciones">
-                    Evaluaciones del Curso
-                </button>
-            </h2>
-            <div id="collapseEvaluaciones" class="accordion-collapse collapse show" aria-labelledby="headingEvaluaciones" data-bs-parent="#accordionEvaluaciones">
-                <div class="accordion-body">
-                    <?php
-                    // Obtener todas las evaluaciones asociadas al curso
-                    $evaluaciones = $conexion->query("SELECT * FROM evaluaciones WHERE curso_id = $curso_id");
-
-                    if ($evaluaciones->num_rows > 0) {
-                        while ($eval = $evaluaciones->fetch_assoc()) {
-                            echo '<div class="mb-4">';
-                            echo '<h5>' . $eval['titulo'] . '</h5>';
-                            echo '<p>' . $eval['descripcion'] . '</p>';
-                            echo '<a href="ver_evaluacion.php?evaluacion_id=' . $eval['id'] . '" class="btn btn-primary">Ver Evaluación</a>';
-                            echo '</div>';
-                            echo '<hr>'; // Separador entre evaluaciones
-                        }
-                    } else {
-                        echo '<p>No hay evaluaciones disponibles para este curso.</p>';
-                    }
-                    ?>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Acordeón para los períodos -->
+    <!-- Acordeón para los periodos -->
     <div class="accordion" id="accordionPeriodos">
         <?php
+        // Definir los periodos
         $periodos = ['primer_periodo', 'segundo_periodo', 'tercer_periodo', 'cuarto_periodo'];
+
         foreach ($periodos as $index => $periodo) {
             echo '<div class="accordion-item">';
             echo '<h2 class="accordion-header" id="heading' . $index . '">';
             echo '<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse' . $index . '" aria-expanded="false" aria-controls="collapse' . $index . '">';
-            echo ucfirst(str_replace('_', ' ', $periodo));
+            echo ucfirst(str_replace('_', ' ', $periodo)); // Mostrar el nombre del periodo
             echo '</button>';
             echo '</h2>';
             echo '<div id="collapse' . $index . '" class="accordion-collapse collapse" aria-labelledby="heading' . $index . '" data-bs-parent="#accordionPeriodos">';
             echo '<div class="accordion-body">';
 
-            // Obtener las tareas del curso para el periodo actual
+            // Obtener las tareas del periodo actual
             $tareas = $conexion->query("SELECT * FROM tareas WHERE curso_id = $curso_id AND periodo = '$periodo'");
 
             if ($tareas->num_rows > 0) {
@@ -93,36 +63,46 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
                     echo '<p><strong>' . basename($tarea['archivo']) . '</strong> (' . ucfirst($tarea['tipo']) . ')</p>';
                     echo '<a href="' . $tarea['archivo'] . '" class="btn btn-primary" download>Descargar</a>';
 
-                    // Botón para subir una tarea si es del tipo 'tarea'
+                    // Botón para responder a la tarea
                     if ($tarea['tipo'] == 'tarea') {
-                        echo '<a href="SubirTarea.php?tarea_id=' . $tarea['id'] . '&curso_id=' . $curso_id . '" class="btn btn-success ms-2">Subir Tarea</a>';
-                        // Mostrar las tareas subidas por los estudiantes para esta tarea
-                        $tareas_alumnos = $conexion->query("SELECT * FROM tareas WHERE tarea_padre_id = " . $tarea['id']);
-                        if ($tareas_alumnos->num_rows > 0) {
-                            echo '<ul class="mt-3 list-group">';
-                            while ($tarea_alumno = $tareas_alumnos->fetch_assoc()) {
-                                echo '<li class="list-group-item">';
-                                echo '<strong>Estudiante:</strong> ' . $tarea_alumno['estudiante'] . '<br>';
-                                echo '<strong>Archivo:</strong> <a href="' . $tarea_alumno['archivo'] . '" download>' . basename($tarea_alumno['archivo']) . '</a><br>';
+                        echo '<button class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#responderModal' . $tarea['id'] . '">Responder Tarea</button>';
 
-                                // Mostrar la calificación si ya existe
-                                if (!is_null($tarea_alumno['calificacion'])) {
-                                    echo '<strong>Calificación:</strong> ' . $tarea_alumno['calificacion'] . '<br>';
-                                } else {
-                                    echo '<em>No se ha calificado esta tarea aún.</em><br>';
-                                }
-                                echo '</li>';
-                            }
-                            echo '</ul>';
-                        } else {
-                            echo '<p class="mt-3"><em>No hay tareas subidas para esta tarea aún.</em></p>';
-                        }
+                        // Modal para responder a la tarea
+                        echo '
+                        <div class="modal fade" id="responderModal' . $tarea['id'] . '" tabindex="-1" aria-labelledby="responderModalLabel' . $tarea['id'] . '" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="responderModalLabel' . $tarea['id'] . '">Responder a la Tarea</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form method="POST" action="guardar_respuesta.php" enctype="multipart/form-data">
+                                            <input type="hidden" name="tarea_id" value="' . $tarea['id'] . '">
+                                            <input type="hidden" name="estudiante_id" value="' . $_SESSION['correo'] . '">
+
+                                            <div class="mb-3">
+                                                <label for="archivo" class="form-label">Subir Archivo (opcional)</label>
+                                                <input type="file" name="archivo" id="archivo" class="form-control">
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label for="texto" class="form-label">Escribir Texto (opcional)</label>
+                                                <textarea name="texto" id="texto" rows="3" class="form-control"></textarea>
+                                            </div>
+
+                                            <button type="submit" name="subir_respuesta" class="btn btn-primary">Enviar Respuesta</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>';
                     }
 
                     echo '</div>';
                 }
             } else {
-                echo '<p>No hay material disponible para este periodo.</p>';
+                echo '<p>No hay tareas disponibles para este periodo.</p>';
             }
 
             echo '</div>';

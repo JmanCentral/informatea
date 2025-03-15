@@ -1,56 +1,11 @@
 
-    <?php
-    include __DIR__ . '/../../../php/conexion_be.php';
-    $curso_id = 91;
-    $titulo = 'Curso quinto';
-
-    // Función para listar archivos y agregar la opción de eliminar
-    function listarArchivos($periodo) {
-        global $conexion, $curso_id;
-        $result = $conexion->query("SELECT * FROM tareas WHERE curso_id=$curso_id AND periodo='$periodo'");
-        echo '<div class="list-group">';
-        while ($archivo = $result->fetch_assoc()) {
-            $archivo_path = $archivo['archivo'];
-            echo '<div class="list-group-item d-flex justify-content-between align-items-center">';
-            echo '<div>';
-            echo '<p><strong>' . basename($archivo_path) . '</strong> - ' . ucfirst($archivo['tipo']) . '</p>';
-            echo '</div>';
-            echo '<div>';
-            echo '<a href="' . $archivo_path . '" class="btn btn-primary btn-sm me-2" download>Descargar</a>';
-            echo '<a href="../../../php/TareasSubidas.php?periodo=' . $archivo['periodo'] . '&tarea_id=' . $archivo['id'] . '" class="btn btn-warning btn-sm me-2">Ver Tareas Subidas</a>';
-            echo '<a href="../../../php/EliminarTarea.php?id=' . $archivo['id'] . '&archivo=' . urlencode($archivo['archivo']) . '" class="btn btn-danger btn-sm" onclick="return confirm(\'¿Estás seguro de eliminar esta tarea?\');">Eliminar</a>';
-            echo '</div>';
-            echo '</div>';
-        }
-        echo '</div>';
-    }
-
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['subir_archivo'])) {
-        $periodo = $_POST['periodo'];
-        $tipo = $_POST['tipo'];
-        $texto = $_POST['texto'] ?? '';
-        $archivo = $_FILES['archivo']['name'] ?? '';
-        $ruta = __DIR__ . '/' . $archivo;
-
-        if (!empty($archivo) && move_uploaded_file($_FILES['archivo']['tmp_name'], $ruta)) {
-            $ruta_relativa = 'Cursos/' . basename(__DIR__) . '/' . $archivo;
-            $conexion->query("INSERT INTO tareas (curso_id, periodo, archivo, tipo) VALUES ($curso_id, '$periodo', '$ruta_relativa', '$tipo')");
-            echo '<p class="alert alert-success">Archivo subido correctamente.</p>';
-        } elseif (!empty($texto)) {
-            $conexion->query("INSERT INTO tareas (curso_id, periodo, archivo, tipo) VALUES ($curso_id, '$periodo', '$texto', 'texto')");
-            echo '<p class="alert alert-success">Texto guardado correctamente.</p>';
-        } else {
-            echo '<p class="alert alert-danger">Error al subir el archivo o enviar el texto.</p>';
-        }
-    }
-    ?>
-
+    
     <!DOCTYPE html>
     <html lang="es">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Curso <?php echo $titulo; ?></title>
+        <title>Curso curso TEA</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <style>
             body {
@@ -136,10 +91,10 @@
         <!-- Menú lateral -->
         <div class="sidebar" id="sidebar">
             <h4 class="text-center mb-4">Menú</h4>
-            <a href="../../../php/crear_evaluacion.php?curso_id=<?php echo $curso_id; ?>">Crear Evaluación</a>
-            <a href="../../../php/ver_respuestas.php?curso_id=<?php echo $curso_id; ?>">Consultar Evaluación</a>
-            <a href="../../../php/ver_comentarios.php?curso_id=<?php echo $curso_id; ?>">Ver Comentarios</a>
-            <a href="../../../php/agregar_tarea.php?curso_id=<?php echo $curso_id; ?>">Ver Tareas</a>
+            <a href="../../../php/crear_evaluacion.php?curso_id=86">Crear Evaluación</a>
+            <a href="../../../php/ver_respuestas.php?curso_id=86">Consultar Evaluación</a>
+            <a href="../../../php/ver_comentarios.php?curso_id=86">Ver Comentarios</a>
+            <a href="../../../php/agregar_tarea.php?curso_id=86">Agregar Tarea</a>
             <a href="#" onclick="mostrarPeriodos()">Ver Periodos</a>
             <a href="../../../php/logout.php" class="logout">Cerrar Sesión</a>
         </div>
@@ -147,7 +102,7 @@
         <!-- Barra superior -->
         <div class="navbar">
             <button onclick="toggleSidebar()">☰</button>
-            <h4 class="ms-3">Curso: <?php echo $titulo; ?></h4>
+            <h4 class="ms-3">Curso: curso TEA</h4>
         </div>
 
         <!-- Contenido principal -->
@@ -162,8 +117,9 @@
                     </h2>
                     <div id="collapseOne" class="accordion-collapse collapse show">
                         <div class="accordion-body">
-                            <?php listarArchivos('primer_periodo'); ?>
-                        </div>
+                            <h5>Tareas del Profesor</h5>
+                            <div class="list-group"><p class="text-muted">No hay tareas subidas por los estudiantes en este periodo.</p></div>                            <h5 class="mt-4">Respuestas de los Estudiantes</h5>
+                            <div class="list-group"><p class="text-muted">No hay respuestas subidas por los estudiantes en este periodo.</p></div>                        </div>
                     </div>
                 </div>
                 <div class="accordion-item">
@@ -174,8 +130,9 @@
                     </h2>
                     <div id="collapseTwo" class="accordion-collapse collapse show">
                         <div class="accordion-body">
-                            <?php listarArchivos('segundo_periodo'); ?>
-                        </div>
+                            <h5>Tareas del Profesor</h5>
+                            <div class="list-group"><div class="list-group-item d-flex justify-content-between align-items-center"><div><p><strong></strong> - Tarea</p></div><div><a href="" class="btn btn-primary btn-sm me-2" download>Descargar</a><a href="../../../php/TareasSubidas.php?periodo=segundo_periodo&tarea_id=4" class="btn btn-warning btn-sm me-2">Ver Tareas Subidas</a><a href="../../../php/EliminarTarea.php?id=4&archivo=" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar esta tarea?');">Eliminar</a></div></div></div>                            <h5 class="mt-4">Respuestas de los Estudiantes</h5>
+                            <div class="list-group"><div class="list-group-item d-flex justify-content-between align-items-center"><div><p><strong>Estudiante ID: 0</strong></p><p>Archivo: </p><p>Texto: dasdasd</p></div><div><a href="" class="btn btn-primary btn-sm me-2" download>Descargar</a></div></div></div>                        </div>
                     </div>
                 </div>
                 <div class="accordion-item">
@@ -186,8 +143,9 @@
                     </h2>
                     <div id="collapseThree" class="accordion-collapse collapse show">
                         <div class="accordion-body">
-                            <?php listarArchivos('tercer_periodo'); ?>
-                        </div>
+                            <h5>Tareas del Profesor</h5>
+                            <div class="list-group"><p class="text-muted">No hay tareas subidas por los estudiantes en este periodo.</p></div>                            <h5 class="mt-4">Respuestas de los Estudiantes</h5>
+                            <div class="list-group"><p class="text-muted">No hay respuestas subidas por los estudiantes en este periodo.</p></div>                        </div>
                     </div>
                 </div>
                 <div class="accordion-item">
@@ -198,8 +156,9 @@
                     </h2>
                     <div id="collapseFour" class="accordion-collapse collapse show">
                         <div class="accordion-body">
-                            <?php listarArchivos('cuarto_periodo'); ?>
-                        </div>
+                            <h5>Tareas del Profesor</h5>
+                            <div class="list-group"><p class="text-muted">No hay tareas subidas por los estudiantes en este periodo.</p></div>                            <h5 class="mt-4">Respuestas de los Estudiantes</h5>
+                            <div class="list-group"><p class="text-muted">No hay respuestas subidas por los estudiantes en este periodo.</p></div>                        </div>
                     </div>
                 </div>
             </div>

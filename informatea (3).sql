@@ -176,7 +176,7 @@ CREATE TABLE `respuestas_estudiantes` (
 
 CREATE TABLE `tareas` (
   `id` int(11) NOT NULL,
-  `curso_id` int(11) NOT NULL,
+  `ocurs_id` int(11) NOT NULL,
   `periodo` varchar(20) NOT NULL,
   `archivo` varchar(255) NOT NULL,
   `tipo` enum('tarea','material') NOT NULL,

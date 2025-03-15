@@ -20,11 +20,20 @@ if (mysqli_num_rows($validar_login) > 0) {
     // Guardar el correo del usuario en la sesión
     $_SESSION['correo'] = $correo;
 
-    // Devolver una respuesta JSON
-    echo json_encode([
-        'success' => true,
-        'redirect' => $rol == 2 ? 'CursosEstudiantes.php' : ($rol == 1 ? 'Profesor.php' : 'Administrador.php')
-    ]);
+    // Si el rol es 2, guardar el correo en la sesión y redirigir
+    if ($rol == 2) {
+        $_SESSION['correo_estudiante'] = $correo; // Guardar el correo en la sesión específica para rol 2
+        echo json_encode([
+            'success' => true,
+            'redirect' => 'CursosEstudiantes.php'
+        ]);
+    } else {
+        // Redirigir según el rol
+        echo json_encode([
+            'success' => true,
+            'redirect' => $rol == 1 ? 'Profesor.php' : 'Administrador.php'
+        ]);
+    }
     exit();
 } else {
     // Devolver una respuesta JSON con el mensaje de error

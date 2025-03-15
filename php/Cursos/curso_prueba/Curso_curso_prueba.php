@@ -1,8 +1,8 @@
 
     <?php
     include __DIR__ . '/../../../php/conexion_be.php';
-    $curso_id = 91;
-    $titulo = 'Curso quinto';
+    $curso_id = 92;
+    $titulo = 'curso prueba';
 
     // Función para listar archivos y agregar la opción de eliminar
     function listarArchivos($periodo) {
@@ -21,6 +21,51 @@
             echo '<a href="../../../php/EliminarTarea.php?id=' . $archivo['id'] . '&archivo=' . urlencode($archivo['archivo']) . '" class="btn btn-danger btn-sm" onclick="return confirm(\'¿Estás seguro de eliminar esta tarea?\');">Eliminar</a>';
             echo '</div>';
             echo '</div>';
+
+            // Mostrar las respuestas de los estudiantes para esta tarea
+            $respuestas = $conexion->query("SELECT * FROM respuestas_tareas WHERE tarea_id = " . $archivo['id']);
+            if ($respuestas->num_rows > 0) {
+                echo '<div class="mt-3">';
+                echo '<h6>Respuestas de los estudiantes:</h6>';
+                while ($respuesta = $respuestas->fetch_assoc()) {
+                    echo '<div class="mb-2">';
+                    echo '<p><strong>Estudiante:</strong> ' . $respuesta['estudiante_id'] . '</p>';
+                    if (!empty($respuesta['archivo'])) {
+                        echo '<p><strong>Archivo:</strong> <a href="' . $respuesta['archivo'] . '" download>' . basename($respuesta['archivo']) . '</a></p>';
+                    }
+                    if (!empty($respuesta['texto'])) {
+                        echo '<p><strong>Texto:</strong> ' . $respuesta['texto'] . '</p>';
+                    }
+                    echo '<button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#calificarModal' . $respuesta['id'] . '">Calificar</button>';
+
+                    // Modal para calificar la respuesta
+                    echo '
+                    <div class="modal fade" id="calificarModal' . $respuesta['id'] . '" tabindex="-1" aria-labelledby="calificarModalLabel' . $respuesta['id'] . '" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="calificarModalLabel' . $respuesta['id'] . '">Calificar Respuesta</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form method="POST" action="guardar_calificacion.php">
+                                        <input type="hidden" name="respuesta_id" value="' . $respuesta['id'] . '">
+                                        <div class="mb-3">
+                                            <label for="calificacion" class="form-label">Calificación</label>
+                                            <input type="number" name="calificacion" id="calificacion" class="form-control" min="0" max="10" step="0.1" required>
+                                        </div>
+                                        <button type="submit" name="guardar_calificacion" class="btn btn-primary">Guardar Calificación</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>';
+                    echo '</div>';
+                }
+                echo '</div>';
+            } else {
+                echo '<p class="text-muted">No hay respuestas subidas por los estudiantes.</p>';
+            }
         }
         echo '</div>';
     }
