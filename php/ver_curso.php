@@ -71,7 +71,7 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
                                 echo '<button class="btn btn-secondary" disabled>Evaluación Respondida</button>';
                             } else {
                                 // Si no ha respondido, mostrar "Ver Evaluación"
-                                echo '<a href="ver_evaluacion.php?evaluacion_id=' . $eval['id'] . '" class="btn btn-primary">Ver Evaluación</a>';
+                                echo '<a href="ver_evaluacion.php?evaluacion_id=' . $eval['id'] . '&curso_id=' .  $curso_id. '" class="btn btn-primary">Ver Evaluación</a>';
                             }
 
                             echo '</div>';

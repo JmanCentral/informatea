@@ -35,7 +35,7 @@
 
             <!--Register-->
             <form action="registro_usuario_be.php" method="POST" class="formulario__register">
-                <h2>Registrarse</h2>
+                <h2>Registrds</h2>
                 <input type="text" placeholder="Nombre completo" name="nombre">
                 <input type="text" placeholder="Correo Electrónico" name="correo">
                 <input type="file" name="foto">
@@ -85,5 +85,7 @@
         });
     });
 </script>
+
+<script src="../js/login.js"></script>
 </body>
 </html>

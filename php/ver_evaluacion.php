@@ -7,7 +7,10 @@ if (!isset($_GET['evaluacion_id'])) {
     exit;
 }
 
+
+
 $evaluacion_id = $_GET['evaluacion_id'];
+$curso_id = isset($_GET['curso_id']) ? $_GET['curso_id'] : null;
 
 // Obtener los datos de la evaluación
 $evaluacion = $conexion->query("SELECT * FROM evaluaciones WHERE id = $evaluacion_id")->fetch_assoc();
@@ -30,7 +33,9 @@ $preguntas = $conexion->query("SELECT * FROM preguntas_evaluaciones WHERE evalua
     <p class="text-center"><?php echo $evaluacion['descripcion']; ?></p>
 
     <form action="procesar_respuesta.php" method="POST">
+        
         <input type="hidden" name="evaluacion_id" value="<?php echo $evaluacion_id; ?>">
+        <input type="hidden" name="curso_id" value="<?php echo $curso_id; ?>">
 
         <?php while ($pregunta = $preguntas->fetch_assoc()) { ?>
             <div class="mb-3">
