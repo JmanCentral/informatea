@@ -1,8 +1,8 @@
 
     <?php
     include __DIR__ . '/../../../php/conexion_be.php';
-    $curso_id = 97;
-    $titulo = 'curso pruebis';
+    $curso_id = 98;
+    $titulo = 'curso calificacion';
 
     // Función para listar respuestas de estudiantes por periodo
     function listarRespuestas($periodo) {
@@ -34,20 +34,30 @@
                         echo '<td>' . $respuesta['estudiante_correo'] . '</td>';
                         echo '<td>';
                         if (!empty($respuesta['archivo'])) {
-                            echo '<p><strong>' . basename($respuesta['archivo']) . '</strong></p>';
-                            echo '<a href="' . $respuesta['archivo'] . '" class="btn btn-primary" download>Descargar</a>';
+
+                            $ruta_archivo = 'Respuestas/' . basename($respuesta['archivo']);
+                            echo '<a href="' . $ruta_archivo . '" download>' . basename($respuesta['archivo']) . '</a>';
                         } else {
                             echo 'N/A';
                         }
                         echo '</td>';
                         echo '<td>' . ($respuesta['texto'] ?? 'N/A') . '</td>';
-                        echo '<td>' . ($respuesta['calificacion'] ?? 'Sin calificar') . '</td>';
+
+                        
+                        // Verificar si la respuesta ya tiene una calificación
+                        $calificacion_query = $conexion->query("SELECT * FROM calificaciones WHERE respuesta_id = " . $respuesta['id']);
+                        $calificacion = $calificacion_query->fetch_assoc();
+
+                        if ($calificacion) {
+                        echo '<td>' . $calificacion['calificacion'] . '</td>';
+                        echo '<td><button class="btn btn-secondary btn-sm " disabled><i class= "bi bi-pencil-square "> </i> Calificado</button></td>';
+                        } else {
+                        echo '<td>Sin calificar</td>';
                         echo '<td>';
                         echo '<button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#calificarModal' . $respuesta['id'] . '">
                                 <i class="bi bi-pencil-square"></i> Calificar
                               </button>';
-
-                        // Modal para calificar la respuesta
+                        }
                         echo '
                         <div class="modal fade" id="calificarModal' . $respuesta['id'] . '" tabindex="-1" aria-labelledby="calificarModalLabel' . $respuesta['id'] . '" aria-hidden="true">
                             <div class="modal-dialog">
@@ -63,7 +73,7 @@
                                                 <label for="calificacion" class="form-label">Calificación</label>
                                                 <input type="number" name="calificacion" id="calificacion" class="form-control" min="0" max="10" step="0.1" required>
                                             </div>
-                                            <div class=\"mb-3\">
+                                            <div class="mb-3">
                                                 <label for="observaciones" class="form-label">Observaciones</label>
                                                  <textarea name="observaciones" id="observaciones" class="form-control" rows="3"></textarea>
                                             </div>
@@ -76,6 +86,7 @@
                         echo '</td>';
                         echo '</tr>';
                     }
+                     
                 } else {
                     echo '<tr><td colspan="5">No hay respuestas subidas por los estudiantes.</td></tr>';
                 }
@@ -167,7 +178,7 @@
         <div class="sidebar" id="sidebar">
             <h4 class="text-center mb-4">Menú</h4>
             <a href="../../../php/crear_evaluacion.php?curso_id=<?php echo $curso_id; ?>">Crear Evaluación</a>
-            <a href="../../../php/ver_respuestas.php?curso_id=<?php echo $curso_id; ?>">Consultar Evaluación</a>
+            <a href="../../../php/ver_evaluaciones.php?curso_id=<?php echo $curso_id; ?>">Consultar Evaluación</a>
             <a href="../../../php/ver_comentarios.php?curso_id=<?php echo $curso_id; ?>">Ver Comentarios</a>
             <a href="../../../php/agregar_tarea.php?curso_id=<?php echo $curso_id; ?>">Ver Tareas</a>
             <a href="#" onclick="mostrarPeriodos()">Ver Periodos</a>

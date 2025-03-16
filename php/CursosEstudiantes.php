@@ -20,16 +20,63 @@ if (!isset($_SESSION['correo_estudiante'])) {
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" rel="stylesheet">
     <link href="../css/styles.css" rel="stylesheet">
     <style>
+        body {
+            background-image: url('/estudiantes/images/principal.jpg'); /* Ruta de la imagen de fondo */
+            background-size: cover; /* Ajusta la imagen para cubrir todo el fondo */
+            background-position: center; /* Centra la imagen */
+            background-attachment: fixed; /* Fija la imagen para que no se desplace con el contenido */
+            background-repeat: no-repeat; /* Evita que la imagen se repita */
+        }
+
+        .content-section {
+            background-color: rgba(255, 255, 255, 0.3); /* Fondo semitransparente para mejorar la legibilidad */
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background-color: rgba(255, 255, 255, 0.9); /* Fondo semitransparente para las tarjetas */
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-img-top {
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .card-text {
+            font-size: 1rem;
+            color: #555;
+        }
+
+        .btn-primary, .btn-success, .btn-info {
+            margin: 5px;
+        }
+
         .curso-izquierda {
             float: left;
             width: 48%;
             margin-right: 2%;
         }
+
         .curso-derecha {
             float: right;
             width: 48%;
             margin-left: 2%;
         }
+
         .clearfix::after {
             content: "";
             clear: both;

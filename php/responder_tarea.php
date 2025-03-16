@@ -1,6 +1,7 @@
 <?php
 include 'conexion_be.php';
 
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['responder_tarea'])) {
     $tarea_id = $_POST['tarea_id'];
     $curso_id = $_POST['curso_id'];
@@ -11,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['responder_tarea'])) {
     if (!empty($archivo_respuesta) || !empty($texto_respuesta)) {
         if (!empty($archivo_respuesta)) {
             // Crear la carpeta de respuestas si no existe
-            $carpeta_respuestas = 'Respuestas/' . $curso_id;
+            $carpeta_respuestas = 'Respuestas/' . $tarea_id;
             if (!file_exists($carpeta_respuestas)) {
                 mkdir($carpeta_respuestas, 0777, true);
             }

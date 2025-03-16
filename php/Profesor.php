@@ -123,20 +123,29 @@ function crearEstructuraCurso($titulo, $id_curso) {
                         echo '<td>';
                         if (!empty(\$respuesta['archivo'])) {
 
-                            \$ruta_archivo = 'Cursos/Respuestas/' . basename(\$respuesta['archivo']);
+                            \$ruta_archivo = 'Respuestas/' . basename(\$respuesta['archivo']);
                             echo '<a href=\"' . \$ruta_archivo . '\" download>' . basename(\$respuesta['archivo']) . '</a>';
                         } else {
                             echo 'N/A';
                         }
                         echo '</td>';
                         echo '<td>' . (\$respuesta['texto'] ?? 'N/A') . '</td>';
-                        echo '<td>' . (\$respuesta['calificacion'] ?? 'Sin calificar') . '</td>';
+
+                        
+                        // Verificar si la respuesta ya tiene una calificación
+                        \$calificacion_query = \$conexion->query(\"SELECT * FROM calificaciones WHERE respuesta_id = \" . \$respuesta['id']);
+                        \$calificacion = \$calificacion_query->fetch_assoc();
+
+                        if (\$calificacion) {
+                        echo '<td>' . \$calificacion['calificacion'] . '</td>';
+                        echo '<td><button class=\"btn btn-secondary btn-sm \" disabled><i class= \"bi bi-pencil-square \"> </i> Calificado</button></td>';
+                        } else {
+                        echo '<td>Sin calificar</td>';
                         echo '<td>';
                         echo '<button class=\"btn btn-info btn-sm\" data-bs-toggle=\"modal\" data-bs-target=\"#calificarModal' . \$respuesta['id'] . '\">
                                 <i class=\"bi bi-pencil-square\"></i> Calificar
                               </button>';
-
-                        // Modal para calificar la respuesta
+                        
                         echo '
                         <div class=\"modal fade\" id=\"calificarModal' . \$respuesta['id'] . '\" tabindex=\"-1\" aria-labelledby=\"calificarModalLabel' . \$respuesta['id'] . '\" aria-hidden=\"true\">
                             <div class=\"modal-dialog\">
