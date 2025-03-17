@@ -170,6 +170,7 @@
             <a href="../../../php/ver_respuestas.php?curso_id=<?php echo $curso_id; ?>">Consultar Evaluación</a>
             <a href="../../../php/ver_comentarios.php?curso_id=<?php echo $curso_id; ?>">Ver Comentarios</a>
             <a href="../../../php/agregar_tarea.php?curso_id=<?php echo $curso_id; ?>">Ver Tareas</a>
+            <a href="../../../php/progreso.php?curso_id=<?php echo $curso_id; ?>">Ver Progeso estudiantes</a>
             <a href="#" onclick="mostrarPeriodos()">Ver Periodos</a>
             <a href="../../../php/profesor.php">Volver a Cursos</a> <!-- Nuevo enlace para volver a los cursos generales -->
             <a href="../../../php/logout.php" class="logout">Cerrar Sesión</a>

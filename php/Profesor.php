@@ -128,12 +128,13 @@ function crearEstructuraCurso($titulo, $id_curso) {
                         } else {
                             echo 'N/A';
                         }
+                        
                         echo '</td>';
                         echo '<td>' . (\$respuesta['texto'] ?? 'N/A') . '</td>';
 
                         
                         // Verificar si la respuesta ya tiene una calificación
-                        \$calificacion_query = \$conexion->query(\"SELECT * FROM calificaciones WHERE respuesta_id = \" . \$respuesta['id']);
+                        \$calificacion_query = \$conexion->query(\"SELECT * FROM calificaciones WHERE respuesta_id = \" .\$respuesta['id']);
                         \$calificacion = \$calificacion_query->fetch_assoc();
 
                         if (\$calificacion) {
@@ -145,6 +146,7 @@ function crearEstructuraCurso($titulo, $id_curso) {
                         echo '<button class=\"btn btn-info btn-sm\" data-bs-toggle=\"modal\" data-bs-target=\"#calificarModal' . \$respuesta['id'] . '\">
                                 <i class=\"bi bi-pencil-square\"></i> Calificar
                               </button>';
+                        }
                         
                         echo '
                         <div class=\"modal fade\" id=\"calificarModal' . \$respuesta['id'] . '\" tabindex=\"-1\" aria-labelledby=\"calificarModalLabel' . \$respuesta['id'] . '\" aria-hidden=\"true\">
@@ -155,7 +157,7 @@ function crearEstructuraCurso($titulo, $id_curso) {
                                         <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" aria-label=\"Close\"></button>
                                     </div>
                                     <div class=\"modal-body\">
-                                        <form method=\"POST\" action=\"/../../../php/guardar_calificacion.php\">
+                                        <form method=\"POST\" action=\"../../../php/guardar_calificacion.php\">
                                             <input type=\"hidden\" name=\"respuesta_id\" value=\"' . \$respuesta['id'] . '\">
                                             <div class=\"mb-3\">
                                                 <label for=\"calificacion\" class=\"form-label\">Calificación</label>
@@ -268,6 +270,7 @@ function crearEstructuraCurso($titulo, $id_curso) {
             <a href=\"../../../php/ver_respuestas.php?curso_id=<?php echo \$curso_id; ?>\">Consultar Evaluación</a>
             <a href=\"../../../php/ver_comentarios.php?curso_id=<?php echo \$curso_id; ?>\">Ver Comentarios</a>
             <a href=\"../../../php/agregar_tarea.php?curso_id=<?php echo \$curso_id; ?>\">Ver Tareas</a>
+            <a href=\"../../../php/progreso.php?curso_id=<?php echo \$curso_id; ?>\">Ver Progeso estudiantes</a>
             <a href=\"#\" onclick=\"mostrarPeriodos()\">Ver Periodos</a>
             <a href=\"../../../php/profesor.php\">Volver a Cursos</a> <!-- Nuevo enlace para volver a los cursos generales -->
             <a href=\"../../../php/logout.php\" class=\"logout\">Cerrar Sesión</a>
