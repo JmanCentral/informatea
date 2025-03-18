@@ -84,6 +84,25 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
                 </div>
             </div>
         </div>
+
+        <div class="accordion mb-4" id="accordionProgreso">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingProgreso">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseProgreso" aria-expanded="true" aria-controls="collapseProgreso">
+                    Progreso del Estudiante
+                </button>
+            </h2>
+            <div id="collapseProgreso" class="accordion-collapse collapse show" aria-labelledby="headingProgreso" data-bs-parent="#accordionProgreso">
+                <div class="accordion-body">
+                    <p>Haz clic en el siguiente botón para ver tu progreso en este curso.</p>
+                    <a href="progreso_estudiantes.php?curso_id=<?php echo $curso_id; ?>&correo=<?php echo urlencode($correo_estudiante); ?>" class="btn btn-primary">
+                        Ver Progreso
+                    </a>
+                </div>
+            </div>
+        </div>
+        </div>
+
     </div>
 
     <!-- Acordeón para los periodos -->
@@ -119,6 +138,8 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
                 echo '<tbody>';
 
                 while ($tarea = $tareas->fetch_assoc()) {
+                    
+
                     echo '<tr>';
                     echo '<td>' . basename($tarea['archivo']) . ' (' . ucfirst($tarea['tipo']) . ')</td>';
                     echo '<td><a href="' . $tarea['archivo'] . '" class="btn btn-primary" download>Descargar</a></td>';
@@ -148,6 +169,8 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
                                             <form method="POST" action="guardar_respuesta.php" enctype="multipart/form-data">
                                                 <input type="hidden" name="tarea_id" value="' . $tarea['id'] . '">
                                                 <input type="hidden" name="estudiante_id" value="' . $correo_estudiante . '">
+                                                <input type="hidden" name="id" value="' . $curso_id . '">
+
 
                                                 <div class="mb-3">
                                                     <label for="archivo" class="form-label">Subir Archivo (opcional)</label>

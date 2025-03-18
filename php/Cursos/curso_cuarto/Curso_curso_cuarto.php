@@ -1,8 +1,8 @@
 
     <?php
     include __DIR__ . '/../../../php/conexion_be.php';
-    $curso_id = 4;
-    $titulo = 'Curso profin';
+    $curso_id = 3;
+    $titulo = 'curso cuarto';
 
     // Función para listar respuestas de estudiantes por periodo
     function listarRespuestas($periodo) {
@@ -31,25 +31,18 @@
                 if ($respuestas->num_rows > 0) {
                     while ($respuesta = $respuestas->fetch_assoc()) {
                         echo '<tr>';
-                    echo '<td>' . $respuesta['estudiante_correo'] . '</td>';
-                    
-                    // Verificar si el archivo existe en el servidor
-                    if (!empty($respuesta['archivo'])) {
+                        echo '<td>' . $respuesta['estudiante_correo'] . '</td>';
+                        echo '<td>';
+                        if (!empty($respuesta['archivo'])) {
 
-                    
-                        // Verifica si el archivo existe
-                        if (file_exists($respuesta['archivo'])) {
-                            echo '<td>' . basename($respuesta['archivo']) . '</td>';
-                            echo '<td><a href="' . $respuesta['archivo'] . '" class="btn btn-primary" download>Descargar</a></td>';
+                            $ruta_archivo = 'Respuestas/' . basename($respuesta['archivo']);
+                            echo '<a href="' . $ruta_archivo . '" download>' . basename($respuesta['archivo']) . '</a>';
                         } else {
-                            echo '<td colspan="2" class="text-danger">Archivo no encontrado</td>';
+                            echo 'N/A';
                         }
-                    } else {
-                        echo '<td colspan="2" class="text-danger">La ruta del archivo está vacía</td>';
-                    }
-            
-                    echo '<td>' . ($respuesta['texto'] ?? 'N/A') . '</td>';
-                    echo '</tr>';
+                        
+                        echo '</td>';
+                        echo '<td>' . ($respuesta['texto'] ?? 'N/A') . '</td>';
 
                         
                         // Verificar si la respuesta ya tiene una calificación
@@ -68,32 +61,30 @@
                         }
                         
                         echo '
-                        <div class="modal fade" id="calificarModal' . $respuesta['id'] . '" tabindex="-1" aria-labelledby="calificarModalLabel' . $respuesta['id'] . '" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="calificarModalLabel' . $respuesta['id'] . '">Calificar Respuesta</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <form method="POST" action="../../../php/guardar_calificacion.php">
-                                            <input type="hidden" name="respuesta_id" value="' . $respuesta['id'] . '">
-                                            <div class="mb-3">
-                                                <label for="calificacion" class="form-label">Calificación</label>
-                                                <input type="number" name="calificacion" id="calificacion" class="form-control" min="0" max="10" step="0.1" required>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="observaciones" class="form-label">Observaciones</label>
-                                                 <textarea name="observaciones" id="observaciones" class="form-control" rows="3"></textarea>
-                                            </div>
-                                            <button type="submit" name="guardar_calificacion" class="btn btn-primary">Guardar Calificación</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>';
-                        echo '</td>';
-                        echo '</tr>';
+     <div class="modal fade" id="calificarModal' . $respuesta['id'] . '" tabindex="-1" aria-labelledby="calificarModalLabel' . $respuesta['id'] . '" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="calificarModalLabel' . $respuesta['id'] . '">Calificar Respuesta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formCalificar' . $respuesta['id'] . '" method="POST" action="../../../php/guardar_calificacion.php">
+                    <input type="hidden" name="respuesta_id" value="' . $respuesta['id'] . '">
+                    <div class="mb-3">
+                        <label for="calificacion" class="form-label">Calificación</label>
+                        <input type="number" name="calificacion" id="calificacion" class="form-control" min="0" max="10" step="0.1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="observaciones" class="form-label">Observaciones</label>
+                        <textarea name="observaciones" id="observaciones" class="form-control" rows="3"></textarea>
+                    </div>
+                    <button type="submit" name="guardar_calificacion" class="btn btn-primary">Guardar Calificación</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>';
                     }
                 } else {
                     echo '<tr><td colspan="5">No hay respuestas subidas por los estudiantes.</td></tr>';
@@ -106,8 +97,46 @@
             echo '<p class="text-muted">No hay tareas en este periodo.</p>';
         }
     }
-
     ?>
+
+    echo '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        // Escuchar el envío del formulario
+        $("form[id^='formCalificar']").on("submit", function(event) {
+            event.preventDefault(); // Evitar el envío tradicional del formulario
+
+            var form = $(this);
+            var url = form.attr("action");
+            var formData = form.serialize(); // Serializar los datos del formulario (incluye el respuesta_id)
+
+            // Enviar la solicitud AJAX
+            $.ajax({
+                url: url,
+                type: "POST",
+                data: formData,
+                dataType: "json",
+                success: function(response) {
+                    if (response.success) {
+                        // Mostrar un mensaje de éxito
+                        alert(response.message);
+
+                        // Recargar la página para actualizar la vista
+                        location.reload();
+                    } else {
+                        // Mostrar un mensaje de error
+                        alert(response.message);
+                    }
+                },
+                error: function() {
+                    alert("Error al enviar la solicitud.");
+                }
+            });
+        });
+    });
+</script>';
+
 
     <!DOCTYPE html>
     <html lang="es">

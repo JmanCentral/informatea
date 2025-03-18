@@ -83,7 +83,7 @@ CREATE TABLE `calificaciones` (
   `observaciones` text DEFAULT NULL,
   `fecha_calificacion` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`respuesta_id`) REFERENCES `respuestas_estudiantes`(`id`) ON DELETE CASCADE
+  FOREIGN KEY (`respuesta_id`) REFERENCES `respuestas_tareas`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `login` (

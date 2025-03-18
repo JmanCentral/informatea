@@ -9,15 +9,14 @@ if (!isset($_SESSION['correo'])) {
     exit;
 }
 
-
 // Obtener el correo del estudiante desde la sesión
 $estudiante_correo = $_SESSION['correo'];
 
 // Verificar si se envió el formulario
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['subir_respuesta'])) {
     
-    $id = $_POST['id'];
     $tarea_id = $_POST['tarea_id'];
+    $curso_id = $_POST['id']; // Recuperar el curso_id desde el formulario
     $archivo = $_FILES['archivo']['name'] ?? '';
     $texto = $_POST['texto'] ?? '';
     $ruta_temporal = $_FILES['archivo']['tmp_name'] ?? '';
@@ -42,9 +41,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['subir_respuesta'])) {
             }
         } else {
             // Insertar la respuesta en la base de datos (solo texto)
-            $conexion->query("INSERT INTO respuestas_tareas (id , tarea_id, estudiante_id, texto) VALUES ($tarea_id, '$estudiante_id', '$texto')");
+            $conexion->query("INSERT INTO respuestas_tareas (tarea_id, estudiante_correo, texto) VALUES ($tarea_id, '$estudiante_correo', '$texto')");
             echo '<p class="alert alert-success">Respuesta enviada correctamente.</p>';
         }
+
+        // Redirigir a la vista anterior con el curso_id
+        header("Location: ver_curso.php?id=$curso_id");
+        exit; // Asegúrate de salir del script después de redirigir
     } else {
         echo '<p class="alert alert-danger">Debes subir un archivo o escribir un texto.</p>';
     }
@@ -64,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['subir_respuesta'])) {
             <div class="modal-body">
                 <form method="POST" action="guardar_respuesta.php" enctype="multipart/form-data">
                     <input type="hidden" name="tarea_id" value="<?php echo $tarea['id']; ?>">
-                    <input type="hidden" name="estudiante_id" value="<?php echo $correo_estudiante; ?>">
+                    <input type="hidden" name="curso_id" value="<?php echo $_GET['curso_id']; ?>"> <!-- Enviar el curso_id -->
 
                     <div class="mb-3">
                         <label for="archivo" class="form-label">Subir Archivo (opcional)</label>
