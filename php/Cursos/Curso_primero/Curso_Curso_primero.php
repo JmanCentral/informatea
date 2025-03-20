@@ -2,7 +2,7 @@
     <?php
     include __DIR__ . '/../../../php/conexion_be.php';
     $curso_id = 1;
-    $titulo = 'Curso primero';
+    $titulo = 'curso primero';
 
     // Función para listar respuestas de estudiantes por periodo
     function listarRespuestas($periodo) {
@@ -61,7 +61,7 @@
                         }
                         
                         echo '
-<div class="modal fade" id="calificarModal' . $respuesta['id'] . '" tabindex="-1" aria-labelledby="calificarModalLabel' . $respuesta['id'] . '" aria-hidden="true">
+     <div class="modal fade" id="calificarModal' . $respuesta['id'] . '" tabindex="-1" aria-labelledby="calificarModalLabel' . $respuesta['id'] . '" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -99,45 +99,43 @@
     }
     ?>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    echo '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
-    
     $(document).ready(function() {
-    // Escuchar el envío del formulario
-    $('form[id^="formCalificar"]').on('submit', function(event) {
-        event.preventDefault(); // Evitar el envío tradicional del formulario
+        // Escuchar el envío del formulario
+        $("form[id^='formCalificar']").on("submit", function(event) {
+            event.preventDefault(); // Evitar el envío tradicional del formulario
 
-        var form = $(this);
-        var url = form.attr('action');
-        var formData = form.serialize(); // Serializar los datos del formulario (incluye el respuesta_id)
+            var form = $(this);
+            var url = form.attr("action");
+            var formData = form.serialize(); // Serializar los datos del formulario (incluye el respuesta_id)
 
-        // Enviar la solicitud AJAX
-        $.ajax({
-            url: url,
-            type: 'POST',
-            data: formData,
-            dataType: 'json',
-            success: function(response) {
-                if (response.success) {
-                    // Mostrar un mensaje de éxito
-                    alert(response.message);
+            // Enviar la solicitud AJAX
+            $.ajax({
+                url: url,
+                type: "POST",
+                data: formData,
+                dataType: "json",
+                success: function(response) {
+                    if (response.success) {
+                        // Mostrar un mensaje de éxito
+                        alert(response.message);
 
-                    // Recargar la página para actualizar la vista
-                    location.reload();
-                } else {
-                    // Mostrar un mensaje de error
-                    alert(response.message);
+                        // Recargar la página para actualizar la vista
+                        location.reload();
+                    } else {
+                        // Mostrar un mensaje de error
+                        alert(response.message);
+                    }
+                },
+                error: function() {
+                    alert("Error al enviar la solicitud.");
                 }
-            },
-            error: function() {
-                alert('Error al enviar la solicitud.');
-            }
+            });
         });
     });
-});
-
-</script>
+</script>';
 
 
     <!DOCTYPE html>
