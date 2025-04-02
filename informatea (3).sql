@@ -95,3 +95,19 @@ CREATE TABLE `login` (
   `foto` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+CREATE TABLE `calificaciones_evaluaciones` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `evaluacion_id` int(11) NOT NULL,
+  `estudiante_correo` varchar(255) NOT NULL,
+  `calificacion` decimal(5,2) NOT NULL,
+  `respuestas_correctas` int(11) NOT NULL,
+  `respuestas_totales` int(11) NOT NULL,
+  `porcentaje` decimal(5,2) NOT NULL,
+  `fecha_calificacion` datetime DEFAULT current_timestamp(),
+  `comentarios` text DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`evaluacion_id`) REFERENCES `evaluaciones`(`id`) ON DELETE CASCADE,
+  UNIQUE KEY `unique_evaluacion_estudiante` (`evaluacion_id`, `estudiante_correo`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

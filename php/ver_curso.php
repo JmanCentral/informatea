@@ -40,6 +40,14 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
 
     <!-- Acordeón para las evaluaciones -->
     <div class="accordion mb-4" id="accordionEvaluaciones">
+    <div class="mb-4">
+        <a href="CursosEstudiantes.php" class="btn btn-outline-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left me-1" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+            </svg>
+            Volver a Mis Cursos
+        </a>
+    </div>
         <div class="accordion-item">
             <h2 class="accordion-header" id="headingEvaluaciones">
                 <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEvaluaciones" aria-expanded="true" aria-controls="collapseEvaluaciones">
@@ -103,7 +111,179 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
         </div>
         </div>
 
+        <div class="accordion mb-4" id="accordionProgreso">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingProgreso">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" 
+                        data-bs-target="#collapseProgreso" aria-expanded="true" 
+                        aria-controls="collapseProgreso">
+                    Progreso y Calificaciones
+                </button>
+            </h2>
+            <div id="collapseProgreso" class="accordion-collapse collapse show" 
+                 aria-labelledby="headingProgreso" data-bs-parent="#accordionProgreso">
+                <div class="accordion-body">
+                    <h5 class="mb-3">Mis Calificaciones</h5>
+                    
+                    <?php
+                    // Consulta para obtener evaluaciones y sus calificaciones
+                    $query_evaluaciones = $conexion->prepare("
+                        SELECT 
+                            e.id, 
+                            e.titulo, 
+                            e.descripcion,
+                            ce.calificacion,
+                            ce.respuestas_correctas,
+                            ce.respuestas_totales,
+                            ce.porcentaje,
+                            ce.comentarios,
+                            ce.fecha_calificacion,
+                            IF(ce.id IS NULL, 0, 1) AS tiene_calificacion
+                        FROM evaluaciones e
+                        LEFT JOIN calificaciones_evaluaciones ce ON e.id = ce.evaluacion_id 
+                            AND ce.estudiante_correo = ?
+                        WHERE e.curso_id = ?
+                        ORDER BY e.fecha_creacion DESC
+                    ");
+                    $query_evaluaciones->bind_param("si", $correo_estudiante, $curso_id);
+                    $query_evaluaciones->execute();
+                    $result_evaluaciones = $query_evaluaciones->get_result();
+
+                    if ($result_evaluaciones->num_rows > 0): 
+                        $contador_calificadas = 0;
+                        $suma_calificaciones = 0;
+                    ?>
+                        <div class="list-group">
+                            <?php while ($eval = $result_evaluaciones->fetch_assoc()): ?>
+                                <div class="list-group-item evaluacion-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1"><?php echo htmlspecialchars($eval['titulo']); ?></h6>
+                                        <?php if ($eval['tiene_calificacion']): 
+                                            $contador_calificadas++;
+                                            $suma_calificaciones += $eval['calificacion'];
+                                            
+                                            // Determinar color según calificación
+                                            $color = 'secondary';
+                                            if ($eval['calificacion'] >= 8) $color = 'success';
+                                            elseif ($eval['calificacion'] >= 6) $color = 'warning';
+                                            elseif ($eval['calificacion'] > 0) $color = 'danger';
+                                        ?>
+                                            <span class="badge bg-<?php echo $color; ?> nota-badge">
+                                                <?php echo number_format($eval['calificacion'], 2); ?>
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="badge bg-secondary nota-badge">Sin calificar</span>
+                                        <?php endif; ?>
+                                    </div>
+                                    
+                                    <p class="mb-1 text-muted small"><?php echo htmlspecialchars($eval['descripcion']); ?></p>
+                                    
+                                    <?php if ($eval['tiene_calificacion']): ?>
+                                        <div class="mt-2">
+                                            <div class="d-flex justify-content-between small mb-1">
+                                                <span>
+                                                    <?php echo $eval['respuestas_correctas']; ?> / 
+                                                    <?php echo $eval['respuestas_totales']; ?> respuestas correctas
+                                                </span>
+                                                <span><?php echo round($eval['porcentaje']); ?>%</span>
+                                            </div>
+                                            <div class="progress progress-thin">
+                                                <div class="progress-bar bg-<?php echo $color; ?>" 
+                                                     role="progressbar" 
+                                                     style="width: <?php echo $eval['porcentaje']; ?>%">
+                                                </div>
+                                            </div>
+                                            
+                                            <?php if (!empty($eval['comentarios'])): ?>
+                                                <div class="mt-2">
+                                                    <button class="btn btn-sm btn-outline-info" 
+                                                            type="button" 
+                                                            data-bs-toggle="collapse" 
+                                                            data-bs-target="#comentario-<?php echo $eval['id']; ?>" 
+                                                            aria-expanded="false">
+                                                        Ver comentarios
+                                                    </button>
+                                                    <div class="collapse mt-2" id="comentario-<?php echo $eval['id']; ?>">
+                                                        <div class="card card-body small">
+                                                            <?php echo nl2br(htmlspecialchars($eval['comentarios'])); ?>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
+                                            
+                                            <div class="text-end small text-muted mt-1">
+                                                Calificada el <?php echo date('d/m/Y', strtotime($eval['fecha_calificacion'])); ?>
+                                            </div>
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="mt-2 small text-muted">
+                                            Esta evaluación aún no ha sido calificada.
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endwhile; ?>
+                        </div>
+                        
+                        <!-- Resumen estadístico -->
+                        <?php if ($contador_calificadas > 0): 
+                            $promedio = $suma_calificaciones / $contador_calificadas;
+                            $color_promedio = 'secondary';
+                            if ($promedio >= 8) $color_promedio = 'success';
+                            elseif ($promedio >= 6) $color_promedio = 'warning';
+                            elseif ($promedio > 0) $color_promedio = 'danger';
+                        ?>
+                            <div class="card mt-4">
+                                <div class="card-body">
+                                    <h6 class="card-title">Resumen de Rendimiento</h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-3">
+                                                    <span class="badge bg-<?php echo $color_promedio; ?> fs-6">
+                                                        <?php echo number_format($promedio, 2); ?>
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <div class="fw-bold">Promedio General</div>
+                                                    <div class="small text-muted">
+                                                        <?php echo $contador_calificadas; ?> evaluaciones calificadas
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="small">
+                                                <div class="d-flex justify-content-between">
+                                                    <span>Evaluaciones completadas:</span>
+                                                    <span>
+                                                        <?php echo $contador_calificadas; ?> de 
+                                                        <?php echo $result_evaluaciones->num_rows; ?>
+                                                    </span>
+                                                </div>
+                                                <div class="progress progress-thin mt-1">
+                                                    <div class="progress-bar bg-primary" 
+                                                         style="width: <?php echo ($contador_calificadas/$result_evaluaciones->num_rows)*100; ?>%">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    <?php else: ?>
+                        <div class="alert alert-info">
+                            No hay evaluaciones disponibles en este curso.
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
     </div>
+
+    </div>
+
+    
 
     <!-- Acordeón para los periodos -->
     <div class="accordion" id="accordionPeriodos">
